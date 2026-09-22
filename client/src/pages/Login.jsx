@@ -40,7 +40,7 @@ function Login() {
 
             setMessage("Login successful");
 
-            navigate("/dashboard");
+            navigate("/");
 
         } catch (error) {
 
