@@ -34,6 +34,8 @@ import MarketOverview
     from "./pages/TradeAI";
     import OptionClock
     from "./pages/OptionClock";
+    import LiveTradeFlow
+    from "./pages/LiveTradeFlow";
 function App() {
     return (
         <BrowserRouter>
@@ -152,6 +154,14 @@ function App() {
     element={
         <ProtectedRoute>
             <TradeFlow />
+        </ProtectedRoute>
+    }
+/>
+<Route
+    path="/live-trade-flow"
+    element={
+        <ProtectedRoute>
+            <LiveTradeFlow />
         </ProtectedRoute>
     }
 />

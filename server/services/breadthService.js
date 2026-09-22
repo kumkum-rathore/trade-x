@@ -84,49 +84,205 @@ const loadInstrumentMaster =
          * current master format.
          */
 
-        const nseStocks =
-            response.data.filter(
-                (item) => {
+    //     const nseStocks =
+    //         response.data.filter(
+    //             (item) => {
 
-                    const exchange =
-                        String(
-                            item.exch_seg || ""
-                        ).toUpperCase();
-
-
-                    return (
-
-                        (
-                            exchange === "NSE" ||
-                            exchange === "NSE_CM"
-                        ) &&
-
-                        item.symbol &&
-
-                        item.token
-
-                    );
-
-                }
-            );
+    //                 const exchange =
+    //                     String(
+    //                         item.exch_seg || ""
+    //                     ).toUpperCase();
 
 
-        instrumentCache =
-            nseStocks;
+    //                 return (
 
-        instrumentCacheTime =
-            now;
+    //                     (
+    //                         exchange === "NSE" ||
+    //                         exchange === "NSE_CM"
+    //                     ) &&
+
+    //                     item.symbol &&
+
+    //                     item.token
+
+    //                 );
+
+    //             }
+    //         );
 
 
-        console.log(
-            `Angel Scrip Master loaded: ${nseStocks.length} NSE instruments`
+    //     instrumentCache =
+    //         nseStocks;
+
+    //     instrumentCacheTime =
+    //         now;
+
+
+    //     console.log(
+    //         `Angel Scrip Master loaded: ${nseStocks.length} NSE instruments`
+    //     );
+
+
+    //     return instrumentCache;
+
+    // };
+
+
+    // =====================================
+// FILTER REQUIRED SEGMENTS
+// =====================================
+
+const instruments =
+    response.data.filter((item) => {
+
+        const exchange =
+            String(
+                item.exch_seg || ""
+            )
+                .trim()
+                .toUpperCase();
+
+        return (
+            (
+                exchange === "NSE" ||
+                exchange === "NSE_CM" ||
+                exchange === "NFO"
+            ) &&
+            item.symbol &&
+            item.token
         );
 
+    });
 
-        return instrumentCache;
 
-    };
+// =====================================
+// DEBUG MASTER
+// =====================================
 
+const nseCount =
+    instruments.filter((item) => {
+
+        const exchange =
+            String(item.exch_seg || "")
+                .trim()
+                .toUpperCase();
+
+        return (
+            exchange === "NSE" ||
+            exchange === "NSE_CM"
+        );
+
+    }).length;
+
+
+const nfoCount =
+    instruments.filter((item) => {
+
+        const exchange =
+            String(item.exch_seg || "")
+                .trim()
+                .toUpperCase();
+
+        return exchange === "NFO";
+
+    }).length;
+
+
+const futstkCount =
+    instruments.filter((item) => {
+
+        const exchange =
+            String(item.exch_seg || "")
+                .trim()
+                .toUpperCase();
+
+        const instrumentType =
+            String(item.instrumenttype || "")
+                .trim()
+                .toUpperCase();
+
+        return (
+            exchange === "NFO" &&
+            instrumentType === "FUTSTK"
+        );
+
+    }).length;
+
+
+console.log(
+    "====================================="
+);
+
+console.log(
+    "ANGEL ONE MASTER DEBUG"
+);
+
+console.log(
+    "TOTAL REQUIRED INSTRUMENTS:",
+    instruments.length
+);
+
+console.log(
+    "NSE:",
+    nseCount
+);
+
+console.log(
+    "NFO:",
+    nfoCount
+);
+
+console.log(
+    "NFO FUTSTK:",
+    futstkCount
+);
+
+console.log(
+    "SAMPLE NFO FUTSTK:",
+    instruments
+        .filter((item) => {
+
+            const exchange =
+                String(item.exch_seg || "")
+                    .trim()
+                    .toUpperCase();
+
+            const instrumentType =
+                String(item.instrumenttype || "")
+                    .trim()
+                    .toUpperCase();
+
+            return (
+                exchange === "NFO" &&
+                instrumentType === "FUTSTK"
+            );
+
+        })
+        .slice(0, 5)
+);
+
+console.log(
+    "=====================================");
+
+
+// =====================================
+// CACHE
+// =====================================
+
+instrumentCache =
+    instruments;
+
+instrumentCacheTime =
+    now;
+
+
+console.log(
+    `Angel Scrip Master loaded: ${instruments.length} instruments`
+);
+
+
+return instrumentCache;
+};
 
 // =====================================
 // GET INSTRUMENT TOKEN

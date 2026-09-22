@@ -7860,3 +7860,1569 @@ small {
     }
 
 }
+/* live tradeflow */
+/* =========================================
+   PAGE
+========================================= */
+
+.live-trade-flow-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 28px;
+    background: #070707;
+    color: #ffffff;
+}
+
+
+/* =========================================
+   TABS
+========================================= */
+
+.live-flow-tabs {
+    display: inline-flex;
+    gap: 4px;
+
+    padding: 6px;
+
+    margin-bottom: 18px;
+
+    background: #171717;
+
+    border: 1px solid #292929;
+
+    border-radius: 10px;
+}
+
+
+.live-flow-tabs button {
+    border: none;
+
+    background: transparent;
+
+    color: #bbbbbb;
+
+    padding: 11px 28px;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.live-flow-tabs button:hover {
+    color: #ffffff;
+}
+
+
+.live-flow-tabs button.active {
+    background: #3d82f6;
+
+    color: #ffffff;
+}
+
+
+/* =========================================
+   MARKET STATUS
+========================================= */
+
+.live-flow-status {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 16px;
+
+    color: #aaaaaa;
+
+    font-size: 12px;
+}
+
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    display: inline-block;
+}
+
+
+.status-open {
+    background: #00d68f;
+
+    box-shadow:
+        0 0 8px #00d68f;
+}
+
+
+.status-closed {
+    background: #777777;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.live-flow-card {
+    background: #101010;
+
+    border: 1px solid #202020;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    margin-bottom: 28px;
+
+    box-shadow:
+        0 10px 30px rgba(
+            0,
+            0,
+            0,
+            0.25
+        );
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.live-flow-card-header {
+    min-height: 82px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 20px 24px;
+
+    border-bottom: 1px solid #292929;
+}
+
+
+.live-flow-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.live-flow-title h2 {
+    margin: 0;
+
+    font-size: 23px;
+
+    letter-spacing: 0.3px;
+}
+
+
+.live-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 7px 13px;
+
+    border-radius: 12px;
+
+    background: #dc3030;
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================
+   SEARCH
+========================================= */
+
+.live-flow-search {
+    width: 270px;
+
+    height: 44px;
+
+    padding: 0 18px;
+
+    border-radius: 25px;
+
+    border: 1px solid #333333;
+
+    outline: none;
+
+    background: #101010;
+
+    color: #ffffff;
+
+    font-size: 14px;
+}
+
+
+.live-flow-search::placeholder {
+    color: #777777;
+}
+
+
+.live-flow-search:focus {
+    border-color: #555555;
+}
+
+
+/* =========================================
+   PROGRESS
+========================================= */
+
+.live-flow-progress {
+    height: 9px;
+
+    margin: 18px 24px 10px;
+
+    border-radius: 10px;
+
+    background: #292929;
+
+    overflow: hidden;
+}
+
+.progress-up {
+    height: 100%;
+
+    background: #0bbd8a;
+
+    border-radius: inherit;
+}
+
+
+.progress-down {
+    height: 100%;
+
+    background: #ff676d;
+
+    border-radius: inherit;
+}
+
+
+/* =========================================
+   COUNTS
+========================================= */
+
+.live-flow-counts {
+    display: flex;
+
+    gap: 24px;
+
+    padding: 0 24px 18px;
+
+    font-size: 15px;
+}
+
+
+.count-up {
+    color: #00d692;
+}
+
+
+.count-down {
+    color: #ff6268;
+}
+
+
+.count-up b,
+.count-down b {
+    font-size: 11px;
+}
+
+
+/* =========================================
+   TABLE HEADER
+========================================= */
+
+.live-flow-table-header {
+    display: grid;
+
+    grid-template-columns:
+        2.1fr
+        0.65fr
+        1fr
+        1.1fr
+        1fr
+        0.9fr
+        1fr;
+
+    align-items: center;
+
+    min-height: 50px;
+
+    padding: 0 24px;
+
+    border-top: 1px solid #292929;
+
+    border-bottom: 1px solid #292929;
+
+    color: #aaaaaa;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.4px;
+}
+
+
+/* =========================================
+   ROW
+========================================= */
+
+.live-flow-row {
+    display: grid;
+
+    grid-template-columns:
+        2.1fr
+        0.65fr
+        1fr
+        1.1fr
+        1fr
+        0.9fr
+        1fr;
+
+    align-items: center;
+
+    min-height: 82px;
+
+    padding: 0 24px;
+
+    border-bottom: 1px solid #292929;
+
+    transition:
+        background 0.2s;
+}
+
+
+.live-flow-row:hover {
+    background: #151515;
+}
+
+
+/* =========================================
+   SYMBOL
+========================================= */
+
+.live-flow-symbol {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    min-width: 0;
+}
+
+
+.stock-avatar {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    font-weight: 800;
+
+    font-size: 14px;
+
+    color: #ffffff;
+}
+
+
+.stock-avatar-green {
+    background: #16a085;
+}
+
+
+.stock-avatar-red {
+    background: #e44a35;
+}
+
+
+.stock-name-box {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    min-width: 0;
+}
+
+
+.stock-name-box strong {
+    font-size: 17px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.stock-name-box span {
+    color: #888888;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================
+   MINI CHART
+========================================= */
+
+.live-flow-mini-chart {
+    height: 38px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    gap: 5px;
+}
+
+
+.mini-bar {
+    width: 7px;
+
+    border-radius: 1px 1px 0 0;
+}
+
+
+.mini-green {
+    height: 17px;
+
+    background: #38c8a5;
+}
+
+
+.mini-yellow {
+    height: 29px;
+
+    background: #e8c74a;
+}
+
+
+.mini-blue {
+    height: 36px;
+
+    background: #5bb9df;
+}
+
+
+/* =========================================
+   PRICE
+========================================= */
+
+.live-flow-price {
+    font-size: 16px;
+
+    font-weight: 500;
+}
+
+
+/* =========================================
+   CHANGE
+========================================= */
+
+.live-flow-change {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 7px 11px;
+
+    border-radius: 11px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.live-flow-change-up {
+    color: #00d99a;
+
+    background: rgba(
+        0,
+        190,
+        140,
+        0.10
+    );
+
+    border: 1px solid rgba(
+        0,
+        190,
+        140,
+        0.35
+    );
+}
+
+
+.live-flow-change-down {
+    color: #ff686d;
+
+    background: rgba(
+        255,
+        80,
+        90,
+        0.10
+    );
+
+    border: 1px solid rgba(
+        255,
+        80,
+        90,
+        0.35
+    );
+}
+
+
+/* =========================================
+   X FACTOR
+========================================= */
+
+.live-flow-xfactor {
+    font-size: 17px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   SIGNAL
+========================================= */
+
+.live-flow-signal {
+    font-size: 28px;
+
+    font-weight: 500;
+
+    line-height: 1;
+}
+
+
+.live-flow-signal-up {
+    color: #00d99a;
+}
+
+
+.live-flow-signal-down {
+    color: #ff686d;
+}
+
+
+.live-flow-signal-neutral {
+    color: #aaaaaa;
+}
+
+
+/* =========================================
+   TIME
+========================================= */
+
+.live-flow-time {
+    color: #aaaaaa;
+
+    font-size: 15px;
+
+    font-family:
+        monospace;
+}
+
+
+/* =========================================
+   EMPTY / LOADING / ERROR
+========================================= */
+
+.live-flow-empty {
+    padding: 50px 20px;
+
+    text-align: center;
+
+    color: #777777;
+}
+
+
+.live-flow-loading {
+    padding: 80px;
+
+    text-align: center;
+
+    color: #aaaaaa;
+}
+
+
+.live-flow-error {
+    padding: 25px;
+
+    border: 1px solid #532828;
+
+    background: #180d0d;
+
+    border-radius: 12px;
+
+    color: #ff686d;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+
+    .live-flow-table-header,
+    .live-flow-row {
+
+        grid-template-columns:
+            1.8fr
+            0.5fr
+            1fr
+            1fr
+            0.8fr
+            0.7fr
+            0.9fr;
+
+        min-width: 900px;
+
+    }
+
+
+    .live-flow-card {
+        overflow-x: auto;
+    }
+
+
+    .live-flow-card-header {
+        min-width: 900px;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .live-trade-flow-page {
+        padding: 14px;
+    }
+
+
+    .live-flow-card-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .live-flow-search {
+        width: 100%;
+    }
+
+
+    .live-flow-tabs {
+        width: 100%;
+    }
+
+
+    .live-flow-tabs button {
+        flex: 1;
+    }
+
+}/* =========================================
+   PAGE
+========================================= */
+
+.live-trade-flow-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 28px;
+    background: #070707;
+    color: #ffffff;
+}
+
+
+/* =========================================
+   TABS
+========================================= */
+
+.live-flow-tabs {
+    display: inline-flex;
+    gap: 4px;
+
+    padding: 6px;
+
+    margin-bottom: 18px;
+
+    background: #171717;
+
+    border: 1px solid #292929;
+
+    border-radius: 10px;
+}
+
+
+.live-flow-tabs button {
+    border: none;
+
+    background: transparent;
+
+    color: #bbbbbb;
+
+    padding: 11px 28px;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.live-flow-tabs button:hover {
+    color: #ffffff;
+}
+
+
+.live-flow-tabs button.active {
+    background: #3d82f6;
+
+    color: #ffffff;
+}
+
+
+/* =========================================
+   MARKET STATUS
+========================================= */
+
+.live-flow-status {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 16px;
+
+    color: #aaaaaa;
+
+    font-size: 12px;
+}
+
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    display: inline-block;
+}
+
+
+.status-open {
+    background: #00d68f;
+
+    box-shadow:
+        0 0 8px #00d68f;
+}
+
+
+.status-closed {
+    background: #777777;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.live-flow-card {
+    background: #101010;
+
+    border: 1px solid #202020;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    margin-bottom: 28px;
+
+    box-shadow:
+        0 10px 30px rgba(
+            0,
+            0,
+            0,
+            0.25
+        );
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.live-flow-card-header {
+    min-height: 82px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 20px 24px;
+
+    border-bottom: 1px solid #292929;
+}
+
+
+.live-flow-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.live-flow-title h2 {
+    margin: 0;
+
+    font-size: 23px;
+
+    letter-spacing: 0.3px;
+}
+
+
+.live-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 7px 13px;
+
+    border-radius: 12px;
+
+    background: #dc3030;
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================
+   SEARCH
+========================================= */
+
+.live-flow-search {
+    width: 270px;
+
+    height: 44px;
+
+    padding: 0 18px;
+
+    border-radius: 25px;
+
+    border: 1px solid #333333;
+
+    outline: none;
+
+    background: #101010;
+
+    color: #ffffff;
+
+    font-size: 14px;
+}
+
+
+.live-flow-search::placeholder {
+    color: #777777;
+}
+
+
+.live-flow-search:focus {
+    border-color: #555555;
+}
+
+
+/* =========================================
+   PROGRESS
+========================================= */
+
+.live-flow-progress {
+    height: 9px;
+
+    margin: 18px 24px 10px;
+
+    border-radius: 10px;
+
+    background: #2b2b2b;
+
+    overflow: hidden;
+}
+
+
+.progress-up {
+    height: 100%;
+
+    background: #0bbd8a;
+
+    border-radius: inherit;
+}
+
+
+.progress-down {
+    height: 100%;
+
+    background: #ff676d;
+
+    border-radius: inherit;
+}
+
+
+/* =========================================
+   COUNTS
+========================================= */
+
+.live-flow-counts {
+    display: flex;
+
+    gap: 24px;
+
+    padding: 0 24px 18px;
+
+    font-size: 15px;
+}
+
+
+.count-up {
+    color: #00d692;
+}
+
+
+.count-down {
+    color: #ff6268;
+}
+
+
+.count-up b,
+.count-down b {
+    font-size: 11px;
+}
+
+
+/* =========================================
+   TABLE HEADER
+========================================= */
+
+.live-flow-table-header {
+    display: grid;
+
+   grid-template-columns:
+    2.1fr
+    1fr
+    1fr
+    1.1fr
+    1fr
+    0.8fr
+    1fr;
+
+    align-items: center;
+
+    min-height: 50px;
+
+    padding: 0 24px;
+
+    border-top: 1px solid #292929;
+
+    border-bottom: 1px solid #292929;
+
+    color: #aaaaaa;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.4px;
+}
+
+
+/* =========================================
+   ROW
+========================================= */
+
+.live-flow-row {
+    display: grid;
+
+    grid-template-columns:
+        2.1fr
+        0.65fr
+        1fr
+        1.1fr
+        1fr
+        0.9fr
+        1fr;
+
+    align-items: center;
+
+    min-height: 82px;
+
+    padding: 0 24px;
+
+    border-bottom: 1px solid #292929;
+
+    transition:
+        background 0.2s;
+}
+
+
+.live-flow-row:hover {
+    background: #151515;
+}
+
+
+/* =========================================
+   SYMBOL
+========================================= */
+
+.live-flow-symbol {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    min-width: 0;
+}
+
+
+.stock-avatar {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    font-weight: 800;
+
+    font-size: 14px;
+
+    color: #ffffff;
+}
+
+
+.stock-avatar-green {
+    background: #16a085;
+}
+
+
+.stock-avatar-red {
+    background: #e44a35;
+}
+
+
+.stock-name-box {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    min-width: 0;
+}
+
+
+.stock-name-box strong {
+    font-size: 17px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.stock-name-box span {
+    color: #888888;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================
+   MINI CHART
+========================================= */
+
+.live-flow-mini-chart {
+    height: 38px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    gap: 5px;
+}
+
+
+.mini-bar {
+    width: 7px;
+
+    border-radius: 1px 1px 0 0;
+}
+
+
+.mini-green {
+    height: 17px;
+
+    background: #38c8a5;
+}
+
+
+.mini-yellow {
+    height: 29px;
+
+    background: #e8c74a;
+}
+
+
+.mini-blue {
+    height: 36px;
+
+    background: #5bb9df;
+}
+
+
+/* =========================================
+   PRICE
+========================================= */
+
+.live-flow-price {
+    font-size: 16px;
+
+    font-weight: 500;
+}
+
+
+/* =========================================
+   CHANGE
+========================================= */
+
+.live-flow-change {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 7px 11px;
+
+    border-radius: 11px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.live-flow-change-up {
+    color: #00d99a;
+
+    background: rgba(
+        0,
+        190,
+        140,
+        0.10
+    );
+
+    border: 1px solid rgba(
+        0,
+        190,
+        140,
+        0.35
+    );
+}
+
+
+.live-flow-change-down {
+    color: #ff686d;
+
+    background: rgba(
+        255,
+        80,
+        90,
+        0.10
+    );
+
+    border: 1px solid rgba(
+        255,
+        80,
+        90,
+        0.35
+    );
+}
+
+
+/* =========================================
+   X FACTOR
+========================================= */
+
+.live-flow-xfactor {
+    font-size: 17px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   SIGNAL
+========================================= */
+
+.live-flow-signal {
+    font-size: 28px;
+
+    font-weight: 500;
+
+    line-height: 1;
+}
+
+
+.live-flow-signal-up {
+    color: #00d99a;
+}
+
+
+.live-flow-signal-down {
+    color: #ff686d;
+}
+
+
+.live-flow-signal-neutral {
+    color: #aaaaaa;
+}
+
+
+/* =========================================
+   TIME
+========================================= */
+
+.live-flow-time {
+    color: #aaaaaa;
+
+    font-size: 15px;
+
+    font-family:
+        monospace;
+}
+
+
+/* =========================================
+   EMPTY / LOADING / ERROR
+========================================= */
+
+.live-flow-empty {
+    padding: 50px 20px;
+
+    text-align: center;
+
+    color: #777777;
+}
+
+
+.live-flow-loading {
+    padding: 80px;
+
+    text-align: center;
+
+    color: #aaaaaa;
+}
+
+
+.live-flow-error {
+    padding: 25px;
+
+    border: 1px solid #532828;
+
+    background: #180d0d;
+
+    border-radius: 12px;
+
+    color: #ff686d;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+
+    .live-flow-table-header,
+    .live-flow-row {
+
+        grid-template-columns:
+            1.8fr
+            0.5fr
+            1fr
+            1fr
+            0.8fr
+            0.7fr
+            0.9fr;
+
+        min-width: 900px;
+
+    }
+
+
+    .live-flow-card {
+        overflow-x: auto;
+    }
+
+
+    .live-flow-card-header {
+        min-width: 900px;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .live-trade-flow-page {
+        padding: 14px;
+    }
+
+
+    .live-flow-card-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .live-flow-search {
+        width: 100%;
+    }
+
+
+    .live-flow-tabs {
+        width: 100%;
+    }
+
+
+    .live-flow-tabs button {
+        flex: 1;
+    }
+
+}
+
+
+/* =========================================
+   STOCK LIST SCROLL
+========================================= */
+
+.live-flow-list {
+    max-height: 520px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+/* scrollbar */
+
+.live-flow-list::-webkit-scrollbar {
+    width: 7px;
+}
+
+
+.live-flow-list::-webkit-scrollbar-track {
+    background: #101010;
+}
+
+
+.live-flow-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        180deg,
+        #7857ff,
+        #00d9ff
+    );
+
+    border-radius: 10px;
+}
+
+
+.live-flow-list::-webkit-scrollbar-thumb:hover {
+    background: #5e8cff;
+}
+
+
+
+/* =========================================
+   BUY / SELL PRESSURE
+========================================= */
+
+.live-flow-pressure {
+    width: 105px;
+}
+
+
+.pressure-label {
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 7px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    color: #999999;
+}
+
+
+.pressure-bar {
+    display: flex;
+
+    width: 100%;
+
+    height: 6px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #292929;
+}
+
+
+.pressure-buy {
+    height: 100%;
+
+    background: #00c991;
+
+    transition:
+        width 0.4s ease;
+}
+
+
+.pressure-sell {
+    height: 100%;
+
+    background: #ff6268;
+
+    transition:
+        width 0.4s ease;
+}
+
+/* =========================================
+   SIGNAL BOX
+========================================= */
+
+.signal-box {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    min-width: 0;
+}
+
+
+.live-flow-signal-icon {
+    font-size: 22px;
+
+    line-height: 1;
+}
+
+
+.signal-text {
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    letter-spacing: 0.2px;
+}
+
+
+.live-flow-signal-up,
+.signal-text.live-flow-signal-up {
+    color: #00d99a;
+}
+
+
+.live-flow-signal-down,
+.signal-text.live-flow-signal-down {
+    color: #ff686d;
+}
+
+
+.live-flow-signal-neutral,
+.signal-text.live-flow-signal-neutral {
+    color: #aaaaaa;
+}

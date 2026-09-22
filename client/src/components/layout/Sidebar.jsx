@@ -43,6 +43,10 @@ function Sidebar() {
     path: "/trade-flow"
 },
 {
+    name: "Live Trade Flow",
+    path: "/live-trade-flow"
+},
+{
     name: "Trade AI",
     path: "/trade-ai"
 },
