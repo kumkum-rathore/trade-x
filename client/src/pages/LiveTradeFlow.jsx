@@ -172,14 +172,10 @@ function LiveTradeFlow() {
 
 
     // =========================================
-    // SEARCH HELPER
+    // SEARCH FILTER HELPER
     // =========================================
 
     const filterStocks = (items) => {
-
-        // IMPORTANT:
-        // Create a copy so .sort() does not mutate
-        // the original backend state.
 
         const result = Array.isArray(items)
             ? [...items]
@@ -228,7 +224,6 @@ function LiveTradeFlow() {
 
     // =========================================
     // SORT HELPER
-    // SAME LOGIC AS TRADE FLOW
     // =========================================
 
     const sortStocks = (items) => {
@@ -236,9 +231,7 @@ function LiveTradeFlow() {
         const result = filterStocks(items);
 
 
-        // =========================================
         // HIGHEST VOLUME
-        // =========================================
 
         if (sortBy === "volume") {
 
@@ -251,9 +244,7 @@ function LiveTradeFlow() {
         }
 
 
-        // =========================================
         // HIGHEST CHANGE
-        // =========================================
 
         if (sortBy === "change") {
 
@@ -266,9 +257,7 @@ function LiveTradeFlow() {
         }
 
 
-        // =========================================
         // HIGHEST X FACTOR
-        // =========================================
 
         if (sortBy === "xFactor") {
 
@@ -281,9 +270,7 @@ function LiveTradeFlow() {
         }
 
 
-        // =========================================
         // HIGHEST PRICE
-        // =========================================
 
         if (sortBy === "price") {
 
@@ -961,6 +948,23 @@ function LiveTradeFlow() {
                         {downPercentage}
 
                         {"% Down)"}
+
+                    </span>
+
+
+                    <span className="count-neutral">
+
+                        <b>●</b>
+
+                        {" "}
+
+                        {unchangedCount}
+
+                        {" stocks ("}
+
+                        {unchangedPercentage}
+
+                        {"% Unchanged)"}
 
                     </span>
 

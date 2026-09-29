@@ -11,15 +11,35 @@ const {
 // CONFIG
 // =====================================================
 
-const CACHE_DURATION = 30 * 1000;
+const CACHE_DURATION = 90 * 1000;          // 90s — longer than full scan
 
-const FULL_MASTER_CACHE_DURATION = 60 * 60 * 1000;
+const FULL_MASTER_CACHE_DURATION =
+    60 * 60 * 1000;
 
-const MAX_STOCKS = 500;
+
+// =====================================================
+// IMPORTANT
+// =====================================================
+
+// Ab 500 ki limit nahi hai.
+// Saare NSE equity instruments scan honge.
+
+const MAX_NSE_STOCKS = Infinity;
+
+
+// Angel One quote API batch size
 
 const BATCH_SIZE = 50;
 
-const BATCH_DELAY = 1100;
+
+// Angel One rate-limit protection
+
+const BATCH_DELAY = 350;
+
+
+// Top Rockers / Shockers
+
+const TOP_RANKED_STOCKS = 50;
 
 
 // =====================================================
@@ -28,6 +48,7 @@ const BATCH_DELAY = 1100;
 
 const SCRIP_MASTER_URL =
     "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json";
+
 
 let fullInstrumentMasterCache = null;
 
@@ -46,14 +67,7 @@ const MIN_X_FACTOR_HISTORY = 3;
 
 
 // =====================================================
-// ROCKERS / SHOCKERS CONFIG
-// =====================================================
-
-const TOP_RANKED_STOCKS = 50;
-
-
-// =====================================================
-// CACHE
+// TRADE FLOW CACHE
 // =====================================================
 
 let tradeFlowCache = {
@@ -170,14 +184,12 @@ const getFNOUnderlyingSymbol = (
     }
 
 
-    // Angel master ka `name`
-    // normally underlying symbol hota hai.
-
     const name = String(
         instrument.name || ""
     )
         .trim()
         .toUpperCase();
+
 
     if (name) {
 
@@ -185,8 +197,6 @@ const getFNOUnderlyingSymbol = (
 
     }
 
-
-    // Fallback
 
     const symbol = String(
         instrument.symbol || ""
@@ -207,6 +217,7 @@ const getFNOUnderlyingSymbol = (
 const getMarketStatus = () => {
 
     const now = new Date();
+
 
     const parts =
         new Intl.DateTimeFormat(
@@ -284,9 +295,9 @@ const getMarketStatus = () => {
     const isOpen =
         isWeekday &&
         totalSeconds >=
-            marketOpenSeconds &&
+        marketOpenSeconds &&
         totalSeconds <
-            marketCloseSeconds;
+        marketCloseSeconds;
 
 
     if (!isWeekday) {
@@ -412,7 +423,7 @@ const calculateAverage = (
 
 
 // =====================================================
-// CALCULATE X FACTOR
+// X FACTOR
 // =====================================================
 
 const calculateXFactor = (
@@ -490,7 +501,7 @@ const calculateXFactor = (
 
 
     // =================================================
-    // CURRENT INTERVAL VOLUME
+    // CURRENT INTERVAL
     // =================================================
 
     const currentIntervalVolume =
@@ -502,7 +513,7 @@ const calculateXFactor = (
 
 
     // =================================================
-    // VOLUME DID NOT INCREASE
+    // NO NEW VOLUME
     // =================================================
 
     if (
@@ -552,10 +563,6 @@ const calculateXFactor = (
     }
 
 
-    // =================================================
-    // OLD HISTORY
-    // =================================================
-
     const oldIntervals =
         Array.isArray(
             previous.intervals
@@ -563,10 +570,6 @@ const calculateXFactor = (
             ? previous.intervals
             : [];
 
-
-    // =================================================
-    // BASELINE
-    // =================================================
 
     const averageIntervalVolume =
         calculateAverage(
@@ -581,10 +584,6 @@ const calculateXFactor = (
             ]
             : 0;
 
-
-    // =================================================
-    // ADD CURRENT INTERVAL
-    // =================================================
 
     const updatedIntervals = [
 
@@ -601,10 +600,6 @@ const calculateXFactor = (
         );
 
 
-    // =================================================
-    // SAVE SNAPSHOT
-    // =================================================
-
     volumeSnapshots.set(
         symbol,
         {
@@ -617,10 +612,6 @@ const calculateXFactor = (
         }
     );
 
-
-    // =================================================
-    // NOT ENOUGH HISTORY
-    // =================================================
 
     if (
         oldIntervals.length <
@@ -648,10 +639,6 @@ const calculateXFactor = (
     }
 
 
-    // =================================================
-    // INVALID BASELINE
-    // =================================================
-
     if (
         averageIntervalVolume <= 0
     ) {
@@ -677,18 +664,10 @@ const calculateXFactor = (
     }
 
 
-    // =================================================
-    // X FACTOR
-    // =================================================
-
     const factor =
         currentIntervalVolume /
         averageIntervalVolume;
 
-
-    // =================================================
-    // VALIDATE
-    // =================================================
 
     if (
         !Number.isFinite(factor) ||
@@ -827,8 +806,6 @@ const calculateSignal = ({
         x > 0;
 
 
-    // BUY SURGE
-
     if (
         validXFactor &&
         x >= 3 &&
@@ -840,8 +817,6 @@ const calculateSignal = ({
 
     }
 
-
-    // SELL PRESSURE
 
     if (
         validXFactor &&
@@ -855,8 +830,6 @@ const calculateSignal = ({
     }
 
 
-    // VOLUME SHOCK
-
     if (
         validXFactor &&
         x >= 4
@@ -866,8 +839,6 @@ const calculateSignal = ({
 
     }
 
-
-    // BREAKOUT
 
     if (
         validXFactor &&
@@ -881,8 +852,6 @@ const calculateSignal = ({
     }
 
 
-    // BREAKDOWN
-
     if (
         validXFactor &&
         x >= 2 &&
@@ -895,8 +864,6 @@ const calculateSignal = ({
     }
 
 
-    // MOMENTUM
-
     if (
         change >= 2
     ) {
@@ -905,8 +872,6 @@ const calculateSignal = ({
 
     }
 
-
-    // WEAKNESS
 
     if (
         change <= -2
@@ -923,7 +888,7 @@ const calculateSignal = ({
 
 
 // =====================================================
-// FETCH COMPLETE ANGEL ONE MASTER
+// LOAD COMPLETE ANGEL MASTER
 // =====================================================
 
 const loadCompleteInstrumentMaster =
@@ -932,10 +897,6 @@ const loadCompleteInstrumentMaster =
         const now =
             Date.now();
 
-
-        // =================================================
-        // VALID CACHE
-        // =================================================
 
         if (
             fullInstrumentMasterCache &&
@@ -947,10 +908,6 @@ const loadCompleteInstrumentMaster =
         }
 
 
-        // =================================================
-        // WAIT FOR EXISTING DOWNLOAD
-        // =================================================
-
         if (
             fullInstrumentMasterPromise
         ) {
@@ -959,10 +916,6 @@ const loadCompleteInstrumentMaster =
 
         }
 
-
-        // =================================================
-        // DOWNLOAD
-        // =================================================
 
         fullInstrumentMasterPromise =
             (async () => {
@@ -1013,73 +966,6 @@ const loadCompleteInstrumentMaster =
 
                 console.log(
                     `TRADE FLOW: Complete Scrip Master loaded - ${data.length} instruments`
-                );
-
-
-                const nseCount =
-                    data.filter(
-                        item =>
-                            String(
-                                item.exch_seg || ""
-                            ).toUpperCase() ===
-                            "NSE"
-                    ).length;
-
-
-                const nfoCount =
-                    data.filter(
-                        item =>
-                            String(
-                                item.exch_seg || ""
-                            ).toUpperCase() ===
-                            "NFO"
-                    ).length;
-
-
-                const futStkCount =
-                    data.filter(
-                        item =>
-                            String(
-                                item.exch_seg || ""
-                            ).toUpperCase() ===
-                            "NFO" &&
-                            String(
-                                item.instrumenttype || ""
-                            ).toUpperCase() ===
-                            "FUTSTK"
-                    ).length;
-
-
-                console.log(
-                    "=========================================="
-                );
-
-                console.log(
-                    "COMPLETE MASTER DEBUG"
-                );
-
-                console.log(
-                    "TOTAL INSTRUMENTS:",
-                    data.length
-                );
-
-                console.log(
-                    "NSE INSTRUMENTS:",
-                    nseCount
-                );
-
-                console.log(
-                    "NFO INSTRUMENTS:",
-                    nfoCount
-                );
-
-                console.log(
-                    "NFO FUTSTK:",
-                    futStkCount
-                );
-
-                console.log(
-                    "=========================================="
                 );
 
 
@@ -1150,10 +1036,6 @@ const transformQuote = (
 
     try {
 
-        // =================================================
-        // TOKEN
-        // =================================================
-
         const token =
             String(
                 quote.symbolToken ||
@@ -1161,19 +1043,11 @@ const transformQuote = (
             );
 
 
-        // =================================================
-        // INSTRUMENT
-        // =================================================
-
         const instrument =
             instrumentMap.get(
                 token
             );
 
-
-        // =================================================
-        // EXCHANGE
-        // =================================================
 
         const exchange =
             String(
@@ -1182,10 +1056,6 @@ const transformQuote = (
                 "UNKNOWN"
             ).toUpperCase();
 
-
-        // =================================================
-        // SYMBOL
-        // =================================================
 
         let symbol;
 
@@ -1212,20 +1082,12 @@ const transformQuote = (
         }
 
 
-        // =================================================
-        // PRICE
-        // =================================================
-
         const price =
             safeNumber(
                 quote.ltp,
                 0
             );
 
-
-        // =================================================
-        // CHANGE %
-        // =================================================
 
         const percentChange =
             safeNumber(
@@ -1234,20 +1096,12 @@ const transformQuote = (
             );
 
 
-        // =================================================
-        // VOLUME
-        // =================================================
-
         const volume =
             safeNumber(
                 quote.tradeVolume,
                 0
             );
 
-
-        // =================================================
-        // BUY QUANTITY
-        // =================================================
 
         const buyQuantity =
             safeNumber(
@@ -1256,20 +1110,12 @@ const transformQuote = (
             );
 
 
-        // =================================================
-        // SELL QUANTITY
-        // =================================================
-
         const sellQuantity =
             safeNumber(
                 quote.totSellQuan,
                 0
             );
 
-
-        // =================================================
-        // PRESSURE
-        // =================================================
 
         const {
             buyPressure,
@@ -1280,10 +1126,6 @@ const transformQuote = (
                 sellQuantity
             );
 
-
-        // =================================================
-        // X FACTOR
-        // =================================================
 
         let xFactorData = {
 
@@ -1315,10 +1157,6 @@ const transformQuote = (
         }
 
 
-        // =================================================
-        // SIGNAL
-        // =================================================
-
         const signal =
             calculateSignal({
 
@@ -1335,24 +1173,13 @@ const transformQuote = (
             });
 
 
-        // =================================================
-        // RESULT
-        // =================================================
-
-        const result = {
+        return {
 
             symbol,
 
             name:
-                exchange === "NFO"
-                    ? (
-                        instrument?.name ||
-                        symbol
-                    )
-                    : (
-                        instrument?.name ||
-                        symbol
-                    ),
+                instrument?.name ||
+                symbol,
 
             tradingSymbol:
                 quote.tradingSymbol ||
@@ -1365,7 +1192,8 @@ const transformQuote = (
 
             price,
 
-            value: price,
+            value:
+                price,
 
             change:
                 safeNumber(
@@ -1379,9 +1207,9 @@ const transformQuote = (
                 ),
 
 
-            // =================================================
+            // =========================================
             // VOLUME
-            // =================================================
+            // =========================================
 
             volume,
 
@@ -1401,9 +1229,9 @@ const transformQuote = (
                 xFactorData.hasXFactorHistory,
 
 
-            // =================================================
+            // =========================================
             // PRICE DATA
-            // =================================================
+            // =========================================
 
             avgPrice:
                 safeNumber(
@@ -1436,9 +1264,9 @@ const transformQuote = (
                 ),
 
 
-            // =================================================
-            // BUY / SELL
-            // =================================================
+            // =========================================
+            // BUY SELL
+            // =========================================
 
             buyQuantity,
 
@@ -1455,9 +1283,9 @@ const transformQuote = (
                 ),
 
 
-            // =================================================
+            // =========================================
             // OPEN INTEREST
-            // =================================================
+            // =========================================
 
             openInterest:
                 safeNumber(
@@ -1466,30 +1294,28 @@ const transformQuote = (
                 ),
 
 
-            // =================================================
+            // =========================================
             // X FACTOR
-            // =================================================
+            // =========================================
 
             xFactor:
                 xFactorData.xFactor === null
-
                     ? null
-
                     : Number(
                         xFactorData.xFactor.toFixed(2)
                     ),
 
 
-            // =================================================
+            // =========================================
             // SIGNAL
-            // =================================================
+            // =========================================
 
             signal,
 
 
-            // =================================================
-            // MARKET STATUS
-            // =================================================
+            // =========================================
+            // MARKET
+            // =========================================
 
             marketStatus:
                 marketStatus.status,
@@ -1498,9 +1324,9 @@ const transformQuote = (
                 marketStatus.isOpen,
 
 
-            // =================================================
-            // EXCHANGE TIME
-            // =================================================
+            // =========================================
+            // TIME
+            // =========================================
 
             exchangeTime:
                 quote.exchFeedTime ||
@@ -1508,9 +1334,6 @@ const transformQuote = (
                 null
 
         };
-
-
-        return result;
 
     }
 
@@ -1530,36 +1353,24 @@ const transformQuote = (
 
 
 // =====================================================
-// ROCKER SCORE
+// NORMALIZE VALUE 0-100
 // =====================================================
 
-const calculateRockerScore = (
-    stock
+const normalizeValue = (
+    value,
+    min,
+    max
 ) => {
 
-    const change =
+    const number =
         safeNumber(
-            stock.changePercent,
+            value,
             0
-        );
-
-
-    const x =
-        safeNumber(
-            stock.xFactor,
-            0
-        );
-
-
-    const buyPressure =
-        safeNumber(
-            stock.buyPressure,
-            50
         );
 
 
     if (
-        change <= 0
+        max <= min
     ) {
 
         return 0;
@@ -1567,212 +1378,259 @@ const calculateRockerScore = (
     }
 
 
-    // PRICE
-
-    const priceScore =
-        Math.min(
-            change,
-            10
-        ) * 5;
-
-
-    // X FACTOR
-
-    const xFactorScore =
-        x > 0
-            ? Math.min(
-                x,
-                10
-            ) * 3
-            : 0;
-
-
-    // BUY PRESSURE
-
-    const buyScore =
-        Math.max(
-            0,
-            buyPressure - 50
-        ) * 0.5;
-
-
-    // SIGNAL BONUS
-
-    let signalBonus = 0;
-
-
-    if (
-        stock.signal ===
-        "BUY SURGE"
-    ) {
-
-        signalBonus = 25;
-
-    }
-
-    else if (
-        stock.signal ===
-        "BREAKOUT"
-    ) {
-
-        signalBonus = 18;
-
-    }
-
-    else if (
-        stock.signal ===
-        "MOMENTUM"
-    ) {
-
-        signalBonus = 10;
-
-    }
-
-    else if (
-        stock.signal ===
-        "VOLUME SHOCK"
-    ) {
-
-        signalBonus = 8;
-
-    }
-
-
-    return Number(
+    const normalized =
         (
-            priceScore +
-            xFactorScore +
-            buyScore +
-            signalBonus
-        ).toFixed(2)
+            (number - min) /
+            (max - min)
+        ) * 100;
+
+
+    return Math.max(
+        0,
+        Math.min(
+            100,
+            normalized
+        )
     );
 
 };
 
 
 // =====================================================
-// SHOCKER SCORE
+// BUILD RANKING DATA
 // =====================================================
 
-const calculateShockerScore = (
-    stock
+const buildRankingData = (
+    stocks
 ) => {
 
-    const change =
-        safeNumber(
-            stock.changePercent,
-            0
-        );
-
-
-    const x =
-        safeNumber(
-            stock.xFactor,
-            0
-        );
-
-
-    const sellPressure =
-        safeNumber(
-            stock.sellPressure,
-            50
-        );
-
-
     if (
-        change >= 0
+        !Array.isArray(stocks) ||
+        stocks.length === 0
     ) {
 
-        return 0;
+        return [];
 
     }
 
 
-    // PRICE
+    const volumes =
+        stocks
+            .map(
+                stock =>
+                    safeNumber(
+                        stock.volume,
+                        0
+                    )
+            )
+            .filter(
+                value =>
+                    value > 0
+            );
 
-    const priceScore =
-        Math.min(
-            Math.abs(change),
-            10
-        ) * 5;
+
+    const changes =
+        stocks.map(
+            stock =>
+                Math.abs(
+                    safeNumber(
+                        stock.changePercent,
+                        0
+                    )
+                )
+        );
 
 
-    // X FACTOR
+    const xFactors =
+        stocks
+            .map(
+                stock =>
+                    safeNumber(
+                        stock.xFactor,
+                        0
+                    )
+            )
+            .filter(
+                value =>
+                    value > 0
+            );
 
-    const xFactorScore =
-        x > 0
-            ? Math.min(
-                x,
-                10
-            ) * 3
+
+    const minVolume =
+        volumes.length
+            ? Math.min(...volumes)
             : 0;
 
 
-    // SELL PRESSURE
-
-    const sellScore =
-        Math.max(
-            0,
-            sellPressure - 50
-        ) * 0.5;
+    const maxVolume =
+        volumes.length
+            ? Math.max(...volumes)
+            : 0;
 
 
-    // SIGNAL BONUS
-
-    let signalBonus = 0;
-
-
-    if (
-        stock.signal ===
-        "SELL PRESSURE"
-    ) {
-
-        signalBonus = 25;
-
-    }
-
-    else if (
-        stock.signal ===
-        "BREAKDOWN"
-    ) {
-
-        signalBonus = 18;
-
-    }
-
-    else if (
-        stock.signal ===
-        "WEAKNESS"
-    ) {
-
-        signalBonus = 10;
-
-    }
-
-    else if (
-        stock.signal ===
-        "VOLUME SHOCK"
-    ) {
-
-        signalBonus = 8;
-
-    }
+    const minChange =
+        changes.length
+            ? Math.min(...changes)
+            : 0;
 
 
-    return Number(
-        (
-            priceScore +
-            xFactorScore +
-            sellScore +
-            signalBonus
-        ).toFixed(2)
-    );
+    const maxChange =
+        changes.length
+            ? Math.max(...changes)
+            : 0;
+
+
+    const minX =
+        xFactors.length
+            ? Math.min(...xFactors)
+            : 0;
+
+
+    const maxX =
+        xFactors.length
+            ? Math.max(...xFactors)
+            : 0;
+
+
+    return stocks.map(stock => {
+
+        const volume =
+            safeNumber(
+                stock.volume,
+                0
+            );
+
+
+        const change =
+            Math.abs(
+                safeNumber(
+                    stock.changePercent,
+                    0
+                )
+            );
+
+
+        const xFactor =
+            safeNumber(
+                stock.xFactor,
+                0
+            );
+
+
+        const volumeRank =
+            normalizeValue(
+                volume,
+                minVolume,
+                maxVolume
+            );
+
+
+        const changeRank =
+            normalizeValue(
+                change,
+                minChange,
+                maxChange
+            );
+
+
+        // =========================================
+        // X-FACTOR AVAILABILITY CHECK
+        // =========================================
+
+        const hasX =
+            xFactor > 0 &&
+            maxX > minX;
+
+
+        let xFactorRank = 0;
+
+        let rankingScore;
+
+
+        // =========================================
+        // MULTI FACTOR SCORE
+        // =========================================
+        //
+        // If X-Factor available:
+        //   Volume   = 40%
+        //   Change   = 35%
+        //   X Factor = 25%
+        //
+        // If X-Factor NOT available (early market):
+        //   Redistribute weight
+        //   Volume   = 53.33%
+        //   Change   = 46.67%
+        //
+
+        if (hasX) {
+
+            xFactorRank =
+                normalizeValue(
+                    xFactor,
+                    minX,
+                    maxX
+                );
+
+
+            rankingScore =
+                (
+                    volumeRank * 0.40
+                ) +
+                (
+                    changeRank * 0.35
+                ) +
+                (
+                    xFactorRank * 0.25
+                );
+
+        }
+
+        else {
+
+            rankingScore =
+                (
+                    volumeRank * (0.40 / 0.75)
+                ) +
+                (
+                    changeRank * (0.35 / 0.75)
+                );
+
+        }
+
+
+        return {
+
+            ...stock,
+
+            volumeRank:
+                Number(
+                    volumeRank.toFixed(2)
+                ),
+
+            changeRank:
+                Number(
+                    changeRank.toFixed(2)
+                ),
+
+            xFactorRank:
+                Number(
+                    xFactorRank.toFixed(2)
+                ),
+
+            rankingScore:
+                Number(
+                    rankingScore.toFixed(2)
+                )
+
+        };
+
+    });
 
 };
 
 
 // =====================================================
-// BUILD ROCKERS
+// MARKET ROCKERS
 // =====================================================
 
 const buildMarketRockers = (
@@ -1788,49 +1646,54 @@ const buildMarketRockers = (
     }
 
 
-    const rockers =
-        stocks
+    // Positive stocks only
 
-            .map(stock => {
-
-                const score =
-                    calculateRockerScore(
-                        stock
-                    );
-
-
-                return {
-
-                    ...stock,
-
-                    rockerScore:
-                        score
-
-                };
-
-            })
-
-            .filter(
-                stock =>
-                    stock.rockerScore > 0
-            );
+    const positiveStocks =
+        stocks.filter(
+            stock =>
+                safeNumber(
+                    stock.changePercent,
+                    0
+                ) > 0
+        );
 
 
-    rockers.sort(
+    if (
+        positiveStocks.length === 0
+    ) {
+
+        return [];
+
+    }
+
+
+    const rankedStocks =
+        buildRankingData(
+            positiveStocks
+        );
+
+
+    rankedStocks.sort(
         (a, b) => {
 
+            // Primary:
+            // Multi factor score
+
             if (
-                b.rockerScore !==
-                a.rockerScore
+                b.rankingScore !==
+                a.rankingScore
             ) {
 
                 return (
-                    b.rockerScore -
-                    a.rockerScore
+                    b.rankingScore -
+                    a.rankingScore
                 );
 
             }
 
+
+            // Secondary:
+            // Change
 
             if (
                 b.changePercent !==
@@ -1845,13 +1708,44 @@ const buildMarketRockers = (
             }
 
 
-            return (
+            // Third:
+            // X Factor
+
+            if (
                 safeNumber(
                     b.xFactor,
                     0
-                ) -
+                ) !==
                 safeNumber(
                     a.xFactor,
+                    0
+                )
+            ) {
+
+                return (
+                    safeNumber(
+                        b.xFactor,
+                        0
+                    ) -
+                    safeNumber(
+                        a.xFactor,
+                        0
+                    )
+                );
+
+            }
+
+
+            // Fourth:
+            // Volume
+
+            return (
+                safeNumber(
+                    b.volume,
+                    0
+                ) -
+                safeNumber(
+                    a.volume,
                     0
                 )
             );
@@ -1860,16 +1754,17 @@ const buildMarketRockers = (
     );
 
 
-    return rockers.slice(
-        0,
-        TOP_RANKED_STOCKS
-    );
+    return rankedStocks
+        .slice(
+            0,
+            TOP_RANKED_STOCKS
+        );
 
 };
 
 
 // =====================================================
-// BUILD SHOCKERS
+// MARKET SHOCKERS
 // =====================================================
 
 const buildMarketShockers = (
@@ -1885,49 +1780,54 @@ const buildMarketShockers = (
     }
 
 
-    const shockers =
-        stocks
+    // Negative stocks only
 
-            .map(stock => {
-
-                const score =
-                    calculateShockerScore(
-                        stock
-                    );
-
-
-                return {
-
-                    ...stock,
-
-                    shockerScore:
-                        score
-
-                };
-
-            })
-
-            .filter(
-                stock =>
-                    stock.shockerScore > 0
-            );
+    const negativeStocks =
+        stocks.filter(
+            stock =>
+                safeNumber(
+                    stock.changePercent,
+                    0
+                ) < 0
+        );
 
 
-    shockers.sort(
+    if (
+        negativeStocks.length === 0
+    ) {
+
+        return [];
+
+    }
+
+
+    const rankedStocks =
+        buildRankingData(
+            negativeStocks
+        );
+
+
+    rankedStocks.sort(
         (a, b) => {
 
+            // Primary:
+            // Multi factor score
+
             if (
-                b.shockerScore !==
-                a.shockerScore
+                b.rankingScore !==
+                a.rankingScore
             ) {
 
                 return (
-                    b.shockerScore -
-                    a.shockerScore
+                    b.rankingScore -
+                    a.rankingScore
                 );
 
             }
 
+
+            // Secondary:
+            // Highest negative change
 
             if (
                 a.changePercent !==
@@ -1942,13 +1842,44 @@ const buildMarketShockers = (
             }
 
 
-            return (
+            // Third:
+            // X Factor
+
+            if (
                 safeNumber(
                     b.xFactor,
                     0
-                ) -
+                ) !==
                 safeNumber(
                     a.xFactor,
+                    0
+                )
+            ) {
+
+                return (
+                    safeNumber(
+                        b.xFactor,
+                        0
+                    ) -
+                    safeNumber(
+                        a.xFactor,
+                        0
+                    )
+                );
+
+            }
+
+
+            // Fourth:
+            // Volume
+
+            return (
+                safeNumber(
+                    b.volume,
+                    0
+                ) -
+                safeNumber(
+                    a.volume,
                     0
                 )
             );
@@ -1957,224 +1888,186 @@ const buildMarketShockers = (
     );
 
 
-    return shockers.slice(
-        0,
-        TOP_RANKED_STOCKS
-    );
+    return rankedStocks
+        .slice(
+            0,
+            TOP_RANKED_STOCKS
+        );
 
 };
 
 
 // =====================================================
-// GET ACTIVE NSE STOCKS
+// GET ALL ACTIVE NSE EQUITY STOCKS
 // =====================================================
 
-const getActiveNSEStocks =
-    async () => {
+const getActiveNSEStocks = async () => {
 
-        const instruments =
-            await loadInstrumentMaster();
+    const instruments = await loadInstrumentMaster();
 
-
-        const equities =
-            instruments.filter(
-                item => {
-
-                    const exchange =
-                        String(
-                            item.exch_seg ||
-                            ""
-                        ).toUpperCase();
-
-
-                    const symbol =
-                        String(
-                            item.symbol ||
-                            ""
-                        ).toUpperCase();
-
-
-                    return (
-
-                        (
-                            exchange ===
-                            "NSE" ||
-
-                            exchange ===
-                            "NSE_CM"
-                        )
-
-                        &&
-
-                        symbol.endsWith(
-                            "-EQ"
-                        )
-
-                        &&
-
-                        item.token
-
-                    );
-
-                }
-            );
-
+    if (!Array.isArray(instruments)) {
 
         console.log(
-            `TRADE FLOW: ${equities.length} NSE equity instruments found`
+            "TRADE FLOW: Instrument master is not an array"
         );
 
+        return [];
 
-        return equities.slice(
-            0,
-            MAX_STOCKS
+    }
+
+    const equities = instruments.filter(item => {
+
+        const exchange = String(
+            item.exch_seg || ""
+        ).toUpperCase();
+
+        const symbol = String(
+            item.symbol || ""
+        ).toUpperCase();
+
+        const token = String(
+            item.token || ""
+        ).trim();
+
+        return (
+
+            exchange === "NSE" &&
+
+            symbol.endsWith("-EQ") &&
+
+            token
+
         );
 
-    };
+    });
+
+    console.log(
+        `TRADE FLOW: ${equities.length} NSE equity instruments found`
+    );
+
+    return equities;
+
+};
 
 
 // =====================================================
 // FETCH ALL NSE STOCKS
 // =====================================================
 
-const fetchAllStocks =
-    async (
-        marketStatus
-    ) => {
+const fetchAllStocks = async (marketStatus) => {
 
-        const instruments =
-            await getActiveNSEStocks();
+    const instruments = await getActiveNSEStocks();
 
+    console.log(
+        `TRADE FLOW: Starting full NSE scan of ${instruments.length} stocks`
+    );
 
-        const instrumentMap =
-            new Map();
+    if (instruments.length === 0) {
 
+        return [];
 
-        instruments.forEach(
-            item => {
+    }
 
-                instrumentMap.set(
+    const instrumentMap = new Map();
 
-                    String(
-                        item.token
-                    ),
+    instruments.forEach(item => {
 
-                    item
-
-                );
-
-            }
+        instrumentMap.set(
+            String(item.token),
+            item
         );
 
+    });
 
-        const results = [];
+    const results = [];
 
+    for (
+        let i = 0;
+        i < instruments.length;
+        i += BATCH_SIZE
+    ) {
 
-        // =================================================
-        // BATCH LOOP
-        // =================================================
+        const batch = instruments.slice(
+            i,
+            i + BATCH_SIZE
+        );
 
-        for (
-            let i = 0;
-            i < instruments.length;
-            i += BATCH_SIZE
-        ) {
+        const batchEnd = Math.min(
+            i + BATCH_SIZE,
+            instruments.length
+        );
 
-            const batch =
-                instruments.slice(
-                    i,
-                    i + BATCH_SIZE
-                );
+        console.log(
+            `TRADE FLOW: Scanning ${i + 1}-${batchEnd}/${instruments.length}`
+        );
 
+        try {
 
-            console.log(
-
-                `TRADE FLOW: Scanning ${i + 1}-${Math.min(
-                    i + BATCH_SIZE,
-                    instruments.length
-                )}/${instruments.length}`
-
+            const quotes = await fetchQuoteBatch(
+                batch,
+                "NSE"
             );
 
-
-            try {
-
-                const quotes =
-                    await fetchQuoteBatch(
-                        batch,
-                        "NSE"
-                    );
-
-
-                const transformed =
-                    quotes
-
-                        .map(
-                            quote =>
-                                transformQuote(
-                                    quote,
-                                    instrumentMap,
-                                    marketStatus
-                                )
-                        )
-
-                        .filter(
-                            stock =>
-                                stock &&
-                                stock.price > 0
-                        );
-
-
-                results.push(
-                    ...transformed
+            const transformed = quotes
+                .map(quote =>
+                    transformQuote(
+                        quote,
+                        instrumentMap,
+                        marketStatus
+                    )
+                )
+                .filter(stock =>
+                    stock &&
+                    stock.price > 0
                 );
 
-            }
+            results.push(...transformed);
 
-            catch (error) {
+        }
+        catch (error) {
 
-                console.log(
-                    "TRADE FLOW NSE BATCH ERROR:",
-                    error.response?.data ||
-                    error.message
-                );
-
-            }
-
-
-            // Angel One rate limit
-
-            if (
-                i + BATCH_SIZE <
-                instruments.length
-            ) {
-
-                await delay(
-                    BATCH_DELAY
-                );
-
-            }
+            console.log(
+                "TRADE FLOW NSE BATCH ERROR:",
+                error.response?.data ||
+                error.message
+            );
 
         }
 
+        if (
+            i + BATCH_SIZE <
+            instruments.length
+        ) {
 
-        // =================================================
-        // SORT BY VOLUME
-        // =================================================
+            await delay(BATCH_DELAY);
 
-        results.sort(
-            (a, b) =>
-                b.volume -
-                a.volume
-        );
+        }
 
+    }
 
-        return results.slice(
-            0,
-            MAX_STOCKS
-        );
+    console.log(
+        "=========================================="
+    );
 
-    };
+    console.log(
+        `TRADE FLOW: FULL NSE SCAN COMPLETED`
+    );
+
+    console.log(
+        `TRADE FLOW: Instruments scanned = ${instruments.length}`
+    );
+
+    console.log(
+        `TRADE FLOW: Valid quotes received = ${results.length}`
+    );
+
+    console.log(
+        "=========================================="
+    );
+
+    return results;
+
+};
 
 
 // =====================================================
@@ -2199,11 +2092,6 @@ const parseExpiry = (
             .trim()
             .toUpperCase();
 
-
-    // =================================================
-    // DDMMMYYYY
-    // Example: 30SEP2026
-    // =================================================
 
     const match =
         value.match(
@@ -2279,10 +2167,6 @@ const parseExpiry = (
     }
 
 
-    // =================================================
-    // NORMAL DATE
-    // =================================================
-
     const date =
         new Date(
             expiry
@@ -2324,17 +2208,9 @@ const getFNOStocks =
 
         try {
 
-            // =================================================
-            // LOAD COMPLETE MASTER
-            // =================================================
-
             const instruments =
                 await loadCompleteInstrumentMaster();
 
-
-            // =================================================
-            // TODAY
-            // =================================================
 
             const today =
                 new Date();
@@ -2348,16 +2224,11 @@ const getFNOStocks =
             );
 
 
-            // =================================================
-            // DEBUG
-            // =================================================
-
             const nfoInstruments =
                 instruments.filter(
                     item =>
                         String(
-                            item.exch_seg ||
-                            ""
+                            item.exch_seg || ""
                         ).toUpperCase() ===
                         "NFO"
                 );
@@ -2367,74 +2238,11 @@ const getFNOStocks =
                 nfoInstruments.filter(
                     item =>
                         String(
-                            item.instrumenttype ||
-                            ""
+                            item.instrumenttype || ""
                         ).toUpperCase() ===
                         "FUTSTK"
                 );
 
-
-            console.log(
-                "=========================================="
-            );
-
-            console.log(
-                "F&O MASTER DEBUG"
-            );
-
-            console.log(
-                "TOTAL MASTER:",
-                instruments.length
-            );
-
-            console.log(
-                "TOTAL NFO:",
-                nfoInstruments.length
-            );
-
-            console.log(
-                "TOTAL NFO FUTSTK:",
-                futStkInstruments.length
-            );
-
-            console.log(
-                "SAMPLE NFO FUTSTK:",
-                futStkInstruments
-                    .slice(0, 5)
-                    .map(item => ({
-
-                        symbol:
-                            item.symbol,
-
-                        name:
-                            item.name,
-
-                        token:
-                            item.token,
-
-                        expiry:
-                            item.expiry,
-
-                        instrumenttype:
-                            item.instrumenttype,
-
-                        exch_seg:
-                            item.exch_seg,
-
-                        lotsize:
-                            item.lotsize
-
-                    }))
-            );
-
-            console.log(
-                "=========================================="
-            );
-
-
-            // =================================================
-            // FILTER VALID FUTURES
-            // =================================================
 
             const futures =
                 futStkInstruments.filter(
@@ -2476,10 +2284,6 @@ const getFNOStocks =
             }
 
 
-            // =================================================
-            // FIND NEAREST EXPIRY
-            // =================================================
-
             futures.sort(
                 (a, b) => {
 
@@ -2510,10 +2314,6 @@ const getFNOStocks =
                 );
 
 
-            // =================================================
-            // ONLY NEAREST EXPIRY
-            // =================================================
-
             const nearestExpiryFutures =
                 futures.filter(
                     item => {
@@ -2529,7 +2329,7 @@ const getFNOStocks =
                             expiry &&
 
                             expiry.getTime() ===
-                                nearestExpiry.getTime()
+                            nearestExpiry.getTime()
 
                         );
 
@@ -2538,15 +2338,9 @@ const getFNOStocks =
 
 
             console.log(
-
                 `TRADE FLOW: ${nearestExpiryFutures.length} NFO FUTSTK contracts found for nearest expiry ${nearestExpiryFutures[0]?.expiry}`
-
             );
 
-
-            // =================================================
-            // INSTRUMENT MAP
-            // =================================================
 
             const instrumentMap =
                 new Map();
@@ -2569,10 +2363,6 @@ const getFNOStocks =
             );
 
 
-            // =================================================
-            // FETCH NFO QUOTES
-            // =================================================
-
             const results = [];
 
 
@@ -2590,12 +2380,10 @@ const getFNOStocks =
 
 
                 console.log(
-
                     `TRADE FLOW: F&O scanning ${i + 1}-${Math.min(
                         i + BATCH_SIZE,
                         nearestExpiryFutures.length
                     )}/${nearestExpiryFutures.length}`
-
                 );
 
 
@@ -2644,10 +2432,6 @@ const getFNOStocks =
                 }
 
 
-                // =================================================
-                // RATE LIMIT
-                // =================================================
-
                 if (
                     i + BATCH_SIZE <
                     nearestExpiryFutures.length
@@ -2661,10 +2445,6 @@ const getFNOStocks =
 
             }
 
-
-            // =================================================
-            // SORT BY VOLUME
-            // =================================================
 
             results.sort(
                 (a, b) => {
@@ -2704,23 +2484,10 @@ const getFNOStocks =
             );
 
 
-            // =================================================
-            // TOP 50
-            // =================================================
-
-            const finalResults =
-                results.slice(
-                    0,
-                    TOP_RANKED_STOCKS
-                );
-
-
-            console.log(
-                `TRADE FLOW: Real F&O results = ${finalResults.length}`
+            return results.slice(
+                0,
+                TOP_RANKED_STOCKS
             );
-
-
-            return finalResults;
 
         }
 
@@ -2752,7 +2519,7 @@ const buildTradeFlow =
 
 
         console.log(
-            "TRADE FLOW: Building fresh market scanner..."
+            "TRADE FLOW: Building FULL market scanner..."
         );
 
 
@@ -2777,7 +2544,7 @@ const buildTradeFlow =
 
 
         // =================================================
-        // ALL ROCKERS
+        // MARKET ROCKERS
         // =================================================
 
         const rockers =
@@ -2787,7 +2554,7 @@ const buildTradeFlow =
 
 
         // =================================================
-        // ALL SHOCKERS
+        // MARKET SHOCKERS
         // =================================================
 
         const shockers =
@@ -2797,7 +2564,7 @@ const buildTradeFlow =
 
 
         // =================================================
-        // REAL F&O
+        // F&O
         // =================================================
 
         const fnoStocks =
@@ -2806,19 +2573,11 @@ const buildTradeFlow =
             );
 
 
-        // =================================================
-        // F&O ROCKERS
-        // =================================================
-
         const fnoRockers =
             buildMarketRockers(
                 fnoStocks
             );
 
-
-        // =================================================
-        // F&O SHOCKERS
-        // =================================================
 
         const fnoShockers =
             buildMarketShockers(
@@ -2860,42 +2619,48 @@ const buildTradeFlow =
         };
 
 
-        // =================================================
-        // LOGS
-        // =================================================
-
         console.log(
-            `TRADE FLOW: Fresh scan completed - ${allStocks.length} stocks`
+            "=========================================="
         );
 
 
         console.log(
-            `TRADE FLOW: All Stocks Rockers - ${rockers.length}`
+            "TRADE FLOW FINAL RESULT"
         );
 
 
         console.log(
-            `TRADE FLOW: All Stocks Shockers - ${shockers.length}`
+            `ALL NSE SCANNED: ${allStocks.length}`
         );
 
 
         console.log(
-            `TRADE FLOW: F&O stocks - ${fnoStocks.length}`
+            `TOP MARKET ROCKERS: ${rockers.length}`
         );
 
 
         console.log(
-            `TRADE FLOW: F&O Rockers - ${fnoRockers.length}`
+            `TOP MARKET SHOCKERS: ${shockers.length}`
         );
 
 
         console.log(
-            `TRADE FLOW: F&O Shockers - ${fnoShockers.length}`
+            `F&O STOCKS: ${fnoStocks.length}`
         );
 
 
         console.log(
-            `TRADE FLOW: Cache = ${CACHE_DURATION / 1000}s`
+            `F&O ROCKERS: ${fnoRockers.length}`
+        );
+
+
+        console.log(
+            `F&O SHOCKERS: ${fnoShockers.length}`
+        );
+
+
+        console.log(
+            `CACHE: ${CACHE_DURATION / 1000}s`
         );
 
 
@@ -2910,7 +2675,7 @@ const buildTradeFlow =
 
 
 // =====================================================
-// MAIN TRADE FLOW
+// GET TRADE FLOW
 // =====================================================
 
 const getTradeFlow =
@@ -2929,17 +2694,13 @@ const getTradeFlow =
             Date.now();
 
 
-        // =================================================
-        // CACHE VALID
-        // =================================================
-
         const cacheValid =
             tradeFlowCache.allStocks.length > 0 &&
             tradeFlowCache.expiresAt > now;
 
 
         // =================================================
-        // RETURN CACHE
+        // CACHE
         // =================================================
 
         if (
@@ -2949,25 +2710,19 @@ const getTradeFlow =
 
             const stocks =
                 requestedType === "fno"
-
                     ? tradeFlowCache.fnoStocks
-
                     : tradeFlowCache.allStocks;
 
 
             const rockers =
                 requestedType === "fno"
-
                     ? tradeFlowCache.fnoRockers
-
                     : tradeFlowCache.rockers;
 
 
             const shockers =
                 requestedType === "fno"
-
                     ? tradeFlowCache.fnoShockers
-
                     : tradeFlowCache.shockers;
 
 
@@ -2978,6 +2733,9 @@ const getTradeFlow =
 
                 count:
                     stocks.length,
+
+                scannedCount:
+                    tradeFlowCache.allStocks.length,
 
                 updatedAt:
                     tradeFlowCache.updatedAt,
@@ -3002,7 +2760,7 @@ const getTradeFlow =
 
 
         // =================================================
-        // WAIT FOR REFRESH
+        // REFRESH LOCK
         // =================================================
 
         if (
@@ -3046,25 +2804,19 @@ const getTradeFlow =
 
         const stocks =
             requestedType === "fno"
-
                 ? tradeFlowCache.fnoStocks
-
                 : tradeFlowCache.allStocks;
 
 
         const rockers =
             requestedType === "fno"
-
                 ? tradeFlowCache.fnoRockers
-
                 : tradeFlowCache.rockers;
 
 
         const shockers =
             requestedType === "fno"
-
                 ? tradeFlowCache.fnoShockers
-
                 : tradeFlowCache.shockers;
 
 
@@ -3075,6 +2827,9 @@ const getTradeFlow =
 
             count:
                 stocks.length,
+
+            scannedCount:
+                tradeFlowCache.allStocks.length,
 
             updatedAt:
                 tradeFlowCache.updatedAt,
@@ -3136,20 +2891,19 @@ const clearTradeFlowCache =
         };
 
 
-        // X Factor history clear
-
         volumeSnapshots.clear();
 
 
-        // Complete master cache clear
+        fullInstrumentMasterCache =
+            null;
 
-        fullInstrumentMasterCache = null;
 
-        fullInstrumentMasterExpiresAt = 0;
+        fullInstrumentMasterExpiresAt =
+            0;
 
 
         console.log(
-            "TRADE FLOW: Cache + volume snapshots + full master cache cleared"
+            "TRADE FLOW: Cache + volume snapshots + master cache cleared"
         );
 
     };
