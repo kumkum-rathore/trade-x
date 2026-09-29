@@ -8,10 +8,14 @@ import api from "../services/api";
 
 import MainLayout from "../components/layout/MainLayout";
 
-import "./LiveTradeFlow.css";
+// import "./LiveTradeFlow.css";
 
 
 function LiveTradeFlow() {
+
+    // =========================================
+    // STATE
+    // =========================================
 
     const [type, setType] = useState("all");
 
@@ -22,6 +26,9 @@ function LiveTradeFlow() {
     const [shockers, setShockers] = useState([]);
 
     const [search, setSearch] = useState("");
+
+    // DEFAULT SORT = HIGHEST VOLUME
+    const [sortBy, setSortBy] = useState("volume");
 
     const [loading, setLoading] = useState(true);
 
@@ -50,9 +57,9 @@ function LiveTradeFlow() {
             const result = response.data?.data;
 
 
-            // -----------------------------------------
+            // =========================================
             // ALL STOCKS
-            // -----------------------------------------
+            // =========================================
 
             setStocks(
                 Array.isArray(result?.stocks)
@@ -61,10 +68,9 @@ function LiveTradeFlow() {
             );
 
 
-            // -----------------------------------------
+            // =========================================
             // MARKET ROCKERS
-            // Backend calculated
-            // -----------------------------------------
+            // =========================================
 
             setRockers(
                 Array.isArray(result?.rockers)
@@ -73,10 +79,9 @@ function LiveTradeFlow() {
             );
 
 
-            // -----------------------------------------
+            // =========================================
             // MARKET SHOCKERS
-            // Backend calculated
-            // -----------------------------------------
+            // =========================================
 
             setShockers(
                 Array.isArray(result?.shockers)
@@ -85,18 +90,18 @@ function LiveTradeFlow() {
             );
 
 
-            // -----------------------------------------
+            // =========================================
             // MARKET STATUS
-            // -----------------------------------------
+            // =========================================
 
             setMarketStatus(
                 result?.marketStatus || null
             );
 
 
-            // -----------------------------------------
+            // =========================================
             // UPDATED TIME
-            // -----------------------------------------
+            // =========================================
 
             setUpdatedAt(
                 result?.updatedAt || null
@@ -136,6 +141,9 @@ function LiveTradeFlow() {
 
         setSearch("");
 
+        // Reset sorting when switching All / F&O
+        setSortBy("volume");
+
         fetchTradeFlow();
 
     }, [type]);
@@ -169,6 +177,15 @@ function LiveTradeFlow() {
 
     const filterStocks = (items) => {
 
+        // IMPORTANT:
+        // Create a copy so .sort() does not mutate
+        // the original backend state.
+
+        const result = Array.isArray(items)
+            ? [...items]
+            : [];
+
+
         const query = search
             .trim()
             .toUpperCase();
@@ -176,12 +193,12 @@ function LiveTradeFlow() {
 
         if (!query) {
 
-            return items;
+            return result;
 
         }
 
 
-        return items.filter((stock) => {
+        return result.filter((stock) => {
 
             const symbol = String(
                 stock?.symbol || ""
@@ -210,25 +227,100 @@ function LiveTradeFlow() {
 
 
     // =========================================
-    // FILTERED ROCKERS
+    // SORT HELPER
+    // SAME LOGIC AS TRADE FLOW
+    // =========================================
+
+    const sortStocks = (items) => {
+
+        const result = filterStocks(items);
+
+
+        // =========================================
+        // HIGHEST VOLUME
+        // =========================================
+
+        if (sortBy === "volume") {
+
+            result.sort(
+                (a, b) =>
+                    Number(b?.volume || 0) -
+                    Number(a?.volume || 0)
+            );
+
+        }
+
+
+        // =========================================
+        // HIGHEST CHANGE
+        // =========================================
+
+        if (sortBy === "change") {
+
+            result.sort(
+                (a, b) =>
+                    Number(b?.changePercent || 0) -
+                    Number(a?.changePercent || 0)
+            );
+
+        }
+
+
+        // =========================================
+        // HIGHEST X FACTOR
+        // =========================================
+
+        if (sortBy === "xFactor") {
+
+            result.sort(
+                (a, b) =>
+                    Number(b?.xFactor || 0) -
+                    Number(a?.xFactor || 0)
+            );
+
+        }
+
+
+        // =========================================
+        // HIGHEST PRICE
+        // =========================================
+
+        if (sortBy === "price") {
+
+            result.sort(
+                (a, b) =>
+                    Number(b?.price || 0) -
+                    Number(a?.price || 0)
+            );
+
+        }
+
+
+        return result;
+
+    };
+
+
+    // =========================================
+    // FILTERED + SORTED ROCKERS
     // =========================================
 
     const filteredRockers = useMemo(() => {
 
-        return filterStocks(rockers).slice(0, 50);
+        return sortStocks(rockers).slice(0, 50);
 
-    }, [rockers, search]);
+    }, [rockers, search, sortBy]);
 
 
     // =========================================
-    // FILTERED SHOCKERS
+    // FILTERED + SORTED SHOCKERS
     // =========================================
 
     const filteredShockers = useMemo(() => {
 
-        return filterStocks(shockers).slice(0, 50);
+        return sortStocks(shockers).slice(0, 50);
 
-    }, [shockers, search]);
+    }, [shockers, search, sortBy]);
 
 
     // =========================================
@@ -272,7 +364,7 @@ function LiveTradeFlow() {
 
 
     // =========================================
-    // HELPERS
+    // FORMAT PRICE
     // =========================================
 
     const formatPrice = (value) => {
@@ -297,6 +389,10 @@ function LiveTradeFlow() {
 
     };
 
+
+    // =========================================
+    // FORMAT PERCENT
+    // =========================================
 
     const formatPercent = (value) => {
 
@@ -760,15 +856,51 @@ function LiveTradeFlow() {
                     </div>
 
 
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={search}
-                        onChange={(e) =>
-                            setSearch(e.target.value)
-                        }
-                        className="live-flow-search"
-                    />
+                    {/* SEARCH + SORT */}
+
+                    <div className="live-flow-controls">
+
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(e.target.value)
+                            }
+                            className="live-flow-search"
+                        />
+
+
+                        <select
+                            value={sortBy}
+                            onChange={(e) =>
+                                setSortBy(e.target.value)
+                            }
+                            className="live-flow-sort"
+                        >
+
+                            <option value="volume">
+                                Highest Volume
+                            </option>
+
+
+                            <option value="change">
+                                Highest Change
+                            </option>
+
+
+                            <option value="xFactor">
+                                Highest X Factor
+                            </option>
+
+
+                            <option value="price">
+                                Highest Price
+                            </option>
+
+                        </select>
+
+                    </div>
 
                 </div>
 
@@ -982,7 +1114,9 @@ function LiveTradeFlow() {
 
             <div className="live-trade-flow-page">
 
-                {/* TOP TABS */}
+                {/* =========================================
+                    TOP TABS
+                ========================================= */}
 
                 <div className="live-flow-tabs">
 
@@ -996,7 +1130,9 @@ function LiveTradeFlow() {
                             setType("all")
                         }
                     >
+
                         All Stocks
+
                     </button>
 
 
@@ -1010,13 +1146,17 @@ function LiveTradeFlow() {
                             setType("fno")
                         }
                     >
+
                         F&O
+
                     </button>
 
                 </div>
 
 
-                {/* MARKET STATUS */}
+                {/* =========================================
+                    MARKET STATUS
+                ========================================= */}
 
                 <div className="live-flow-status">
 
@@ -1053,7 +1193,9 @@ function LiveTradeFlow() {
                 </div>
 
 
-                {/* ERROR DURING REFRESH */}
+                {/* =========================================
+                    ERROR DURING REFRESH
+                ========================================= */}
 
                 {error && stocks.length > 0 && (
 
@@ -1066,7 +1208,9 @@ function LiveTradeFlow() {
                 )}
 
 
-                {/* MARKET ROCKERS */}
+                {/* =========================================
+                    MARKET ROCKERS
+                ========================================= */}
 
                 <FlowSection
                     title="MARKET ROCKERS"
@@ -1074,7 +1218,9 @@ function LiveTradeFlow() {
                 />
 
 
-                {/* MARKET SHOCKERS */}
+                {/* =========================================
+                    MARKET SHOCKERS
+                ========================================= */}
 
                 <FlowSection
                     title="MARKET SHOCKERS"

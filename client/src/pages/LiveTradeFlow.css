@@ -831,3 +831,35 @@
     background: rgba(59, 130, 246, 0.05);
   }
 }
+
+.live-flow-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.live-flow-sort {
+    height: 48px;
+    min-width: 190px;
+    padding: 0 16px;
+    border: 1px solid #333;
+    border-radius: 24px;
+    background: #111;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    cursor: pointer;
+}
+
+.live-flow-sort:focus {
+    border-color: #3b82f6;
+}
+
+.live-flow-sort option {
+    background: #111;
+    color: #fff;
+}
+
+.live-flow-search {
+    height: 48px;
+}
