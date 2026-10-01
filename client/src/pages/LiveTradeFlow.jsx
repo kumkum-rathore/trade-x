@@ -32,6 +32,9 @@ function LiveTradeFlow() {
 
     const [loading, setLoading] = useState(true);
 
+    // ✅ NEW: Refresh button state
+    const [refreshing, setRefreshing] = useState(false);
+
     const [error, setError] = useState("");
 
     const [marketStatus, setMarketStatus] = useState(null);
@@ -43,23 +46,35 @@ function LiveTradeFlow() {
     // FETCH LIVE TRADE FLOW
     // =========================================
 
-    const fetchTradeFlow = async () => {
+    const fetchTradeFlow = async (forceRefresh = false) => {
 
         try {
 
             setError("");
 
-            const response = await api.get(
-                `/market-data/trade-flow?type=${type}`
-            );
+            if (forceRefresh) {
+
+                setRefreshing(true);
+
+            }
+
+
+            // ✅ forceRefresh → backend cache bypass
+
+            const url = forceRefresh
+
+                ? `/market-data/trade-flow?type=${type}&refresh=true`
+
+                : `/market-data/trade-flow?type=${type}`;
+
+
+            const response = await api.get(url);
 
 
             const result = response.data?.data;
 
 
-            // =========================================
             // ALL STOCKS
-            // =========================================
 
             setStocks(
                 Array.isArray(result?.stocks)
@@ -68,9 +83,7 @@ function LiveTradeFlow() {
             );
 
 
-            // =========================================
             // MARKET ROCKERS
-            // =========================================
 
             setRockers(
                 Array.isArray(result?.rockers)
@@ -79,9 +92,7 @@ function LiveTradeFlow() {
             );
 
 
-            // =========================================
             // MARKET SHOCKERS
-            // =========================================
 
             setShockers(
                 Array.isArray(result?.shockers)
@@ -90,18 +101,14 @@ function LiveTradeFlow() {
             );
 
 
-            // =========================================
             // MARKET STATUS
-            // =========================================
 
             setMarketStatus(
                 result?.marketStatus || null
             );
 
 
-            // =========================================
             // UPDATED TIME
-            // =========================================
 
             setUpdatedAt(
                 result?.updatedAt || null
@@ -126,6 +133,8 @@ function LiveTradeFlow() {
 
             setLoading(false);
 
+            setRefreshing(false);
+
         }
 
     };
@@ -141,7 +150,6 @@ function LiveTradeFlow() {
 
         setSearch("");
 
-        // Reset sorting when switching All / F&O
         setSortBy("volume");
 
         fetchTradeFlow();
@@ -150,7 +158,7 @@ function LiveTradeFlow() {
 
 
     // =========================================
-    // AUTO REFRESH - 30 SECONDS
+    // AUTO REFRESH - 15 SECONDS
     // =========================================
 
     useEffect(() => {
@@ -159,7 +167,7 @@ function LiveTradeFlow() {
 
             fetchTradeFlow();
 
-        }, 30000);
+        }, 15000);
 
 
         return () => {
@@ -1159,7 +1167,7 @@ function LiveTradeFlow() {
 
 
                 {/* =========================================
-                    MARKET STATUS
+                    MARKET STATUS + REFRESH BUTTON
                 ========================================= */}
 
                 <div className="live-flow-status">
@@ -1193,6 +1201,23 @@ function LiveTradeFlow() {
                         </span>
 
                     )}
+
+
+                    {/* ✅ NEW: MANUAL REFRESH BUTTON */}
+
+                    <button
+                        className="live-flow-refresh-btn"
+                        onClick={() =>
+                            fetchTradeFlow(true)
+                        }
+                        disabled={refreshing}
+                    >
+
+                        {refreshing
+                            ? "⟳ Refreshing..."
+                            : "⟳ Refresh"}
+
+                    </button>
 
                 </div>
 

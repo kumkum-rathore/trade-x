@@ -11,7 +11,11 @@ const {
 // CONFIG
 // =====================================================
 
-const CACHE_DURATION = 90 * 1000;          // 90s — longer than full scan
+// Cache for browser requests
+const CACHE_DURATION = 90 * 1000;
+
+// ✅ NEW: Background snapshot interval (X-Factor jaldi bane)
+const BACKGROUND_SNAPSHOT_INTERVAL = 15 * 1000;
 
 const FULL_MASTER_CACHE_DURATION =
     60 * 60 * 1000;
@@ -63,7 +67,9 @@ let fullInstrumentMasterPromise = null;
 
 const X_FACTOR_HISTORY_SIZE = 6;
 
-const MIN_X_FACTOR_HISTORY = 3;
+// ✅ FIX: 2 intervals chahiye (jaldi X-Factor)
+// 15s × 2 = 30s me X-Factor ready
+const MIN_X_FACTOR_HISTORY = 2;
 
 
 // =====================================================
@@ -463,9 +469,7 @@ const calculateXFactor = (
         volumeSnapshots.get(symbol);
 
 
-    // =================================================
     // FIRST SNAPSHOT
-    // =================================================
 
     if (!previous) {
 
@@ -500,9 +504,7 @@ const calculateXFactor = (
     }
 
 
-    // =================================================
     // CURRENT INTERVAL
-    // =================================================
 
     const currentIntervalVolume =
         Math.max(
@@ -512,9 +514,7 @@ const calculateXFactor = (
         );
 
 
-    // =================================================
     // NO NEW VOLUME
-    // =================================================
 
     if (
         currentIntervalVolume <= 0
@@ -1207,9 +1207,7 @@ const transformQuote = (
                 ),
 
 
-            // =========================================
             // VOLUME
-            // =========================================
 
             volume,
 
@@ -1229,9 +1227,7 @@ const transformQuote = (
                 xFactorData.hasXFactorHistory,
 
 
-            // =========================================
             // PRICE DATA
-            // =========================================
 
             avgPrice:
                 safeNumber(
@@ -1264,9 +1260,7 @@ const transformQuote = (
                 ),
 
 
-            // =========================================
             // BUY SELL
-            // =========================================
 
             buyQuantity,
 
@@ -1283,9 +1277,7 @@ const transformQuote = (
                 ),
 
 
-            // =========================================
             // OPEN INTEREST
-            // =========================================
 
             openInterest:
                 safeNumber(
@@ -1294,9 +1286,7 @@ const transformQuote = (
                 ),
 
 
-            // =========================================
             // X FACTOR
-            // =========================================
 
             xFactor:
                 xFactorData.xFactor === null
@@ -1306,16 +1296,12 @@ const transformQuote = (
                     ),
 
 
-            // =========================================
             // SIGNAL
-            // =========================================
 
             signal,
 
 
-            // =========================================
             // MARKET
-            // =========================================
 
             marketStatus:
                 marketStatus.status,
@@ -1324,9 +1310,7 @@ const transformQuote = (
                 marketStatus.isOpen,
 
 
-            // =========================================
             // TIME
-            // =========================================
 
             exchangeTime:
                 quote.exchFeedTime ||
@@ -1492,6 +1476,11 @@ const buildRankingData = (
             : 0;
 
 
+    const hasAnyXFactor =
+        xFactors.length > 0 &&
+        maxX > minX;
+
+
     return stocks.map(stock => {
 
         const volume =
@@ -1533,67 +1522,33 @@ const buildRankingData = (
             );
 
 
-        // =========================================
-        // X-FACTOR AVAILABILITY CHECK
-        // =========================================
+        const xFactorRank =
+            hasAnyXFactor
+                ? normalizeValue(
+                    xFactor,
+                    minX,
+                    maxX
+                )
+                : 0;
 
-        const hasX =
-            xFactor > 0 &&
-            maxX > minX;
-
-
-        let xFactorRank = 0;
 
         let rankingScore;
 
 
-        // =========================================
-        // MULTI FACTOR SCORE
-        // =========================================
-        //
-        // If X-Factor available:
-        //   Volume   = 40%
-        //   Change   = 35%
-        //   X Factor = 25%
-        //
-        // If X-Factor NOT available (early market):
-        //   Redistribute weight
-        //   Volume   = 53.33%
-        //   Change   = 46.67%
-        //
-
-        if (hasX) {
-
-            xFactorRank =
-                normalizeValue(
-                    xFactor,
-                    minX,
-                    maxX
-                );
-
+        if (hasAnyXFactor) {
 
             rankingScore =
-                (
-                    volumeRank * 0.40
-                ) +
-                (
-                    changeRank * 0.35
-                ) +
-                (
-                    xFactorRank * 0.25
-                );
+                (volumeRank * 0.40) +
+                (changeRank * 0.35) +
+                (xFactorRank * 0.25);
 
         }
 
         else {
 
             rankingScore =
-                (
-                    volumeRank * (0.40 / 0.75)
-                ) +
-                (
-                    changeRank * (0.35 / 0.75)
-                );
+                (volumeRank * (0.40 / 0.75)) +
+                (changeRank * (0.35 / 0.75));
 
         }
 
@@ -1646,8 +1601,6 @@ const buildMarketRockers = (
     }
 
 
-    // Positive stocks only
-
     const positiveStocks =
         stocks.filter(
             stock =>
@@ -1676,9 +1629,6 @@ const buildMarketRockers = (
     rankedStocks.sort(
         (a, b) => {
 
-            // Primary:
-            // Multi factor score
-
             if (
                 b.rankingScore !==
                 a.rankingScore
@@ -1691,9 +1641,6 @@ const buildMarketRockers = (
 
             }
 
-
-            // Secondary:
-            // Change
 
             if (
                 b.changePercent !==
@@ -1708,57 +1655,32 @@ const buildMarketRockers = (
             }
 
 
-            // Third:
-            // X Factor
-
             if (
-                safeNumber(
-                    b.xFactor,
-                    0
-                ) !==
-                safeNumber(
-                    a.xFactor,
-                    0
-                )
+                safeNumber(b.xFactor, 0) !==
+                safeNumber(a.xFactor, 0)
             ) {
 
                 return (
-                    safeNumber(
-                        b.xFactor,
-                        0
-                    ) -
-                    safeNumber(
-                        a.xFactor,
-                        0
-                    )
+                    safeNumber(b.xFactor, 0) -
+                    safeNumber(a.xFactor, 0)
                 );
 
             }
 
 
-            // Fourth:
-            // Volume
-
             return (
-                safeNumber(
-                    b.volume,
-                    0
-                ) -
-                safeNumber(
-                    a.volume,
-                    0
-                )
+                safeNumber(b.volume, 0) -
+                safeNumber(a.volume, 0)
             );
 
         }
     );
 
 
-    return rankedStocks
-        .slice(
-            0,
-            TOP_RANKED_STOCKS
-        );
+    return rankedStocks.slice(
+        0,
+        TOP_RANKED_STOCKS
+    );
 
 };
 
@@ -1779,8 +1701,6 @@ const buildMarketShockers = (
 
     }
 
-
-    // Negative stocks only
 
     const negativeStocks =
         stocks.filter(
@@ -1810,9 +1730,6 @@ const buildMarketShockers = (
     rankedStocks.sort(
         (a, b) => {
 
-            // Primary:
-            // Multi factor score
-
             if (
                 b.rankingScore !==
                 a.rankingScore
@@ -1825,9 +1742,6 @@ const buildMarketShockers = (
 
             }
 
-
-            // Secondary:
-            // Highest negative change
 
             if (
                 a.changePercent !==
@@ -1842,57 +1756,32 @@ const buildMarketShockers = (
             }
 
 
-            // Third:
-            // X Factor
-
             if (
-                safeNumber(
-                    b.xFactor,
-                    0
-                ) !==
-                safeNumber(
-                    a.xFactor,
-                    0
-                )
+                safeNumber(b.xFactor, 0) !==
+                safeNumber(a.xFactor, 0)
             ) {
 
                 return (
-                    safeNumber(
-                        b.xFactor,
-                        0
-                    ) -
-                    safeNumber(
-                        a.xFactor,
-                        0
-                    )
+                    safeNumber(b.xFactor, 0) -
+                    safeNumber(a.xFactor, 0)
                 );
 
             }
 
 
-            // Fourth:
-            // Volume
-
             return (
-                safeNumber(
-                    b.volume,
-                    0
-                ) -
-                safeNumber(
-                    a.volume,
-                    0
-                )
+                safeNumber(b.volume, 0) -
+                safeNumber(a.volume, 0)
             );
 
         }
     );
 
 
-    return rankedStocks
-        .slice(
-            0,
-            TOP_RANKED_STOCKS
-        );
+    return rankedStocks.slice(
+        0,
+        TOP_RANKED_STOCKS
+    );
 
 };
 
@@ -2379,14 +2268,6 @@ const getFNOStocks =
                     );
 
 
-                console.log(
-                    `TRADE FLOW: F&O scanning ${i + 1}-${Math.min(
-                        i + BATCH_SIZE,
-                        nearestExpiryFutures.length
-                    )}/${nearestExpiryFutures.length}`
-                );
-
-
                 try {
 
                     const quotes =
@@ -2398,7 +2279,6 @@ const getFNOStocks =
 
                     const transformed =
                         quotes
-
                             .map(
                                 quote =>
                                     transformQuote(
@@ -2407,7 +2287,6 @@ const getFNOStocks =
                                         marketStatus
                                     )
                             )
-
                             .filter(
                                 stock =>
                                     stock &&
@@ -2450,14 +2329,8 @@ const getFNOStocks =
                 (a, b) => {
 
                     const volumeDifference =
-                        safeNumber(
-                            b.volume,
-                            0
-                        ) -
-                        safeNumber(
-                            a.volume,
-                            0
-                        );
+                        safeNumber(b.volume, 0) -
+                        safeNumber(a.volume, 0);
 
 
                     if (
@@ -2470,14 +2343,8 @@ const getFNOStocks =
 
 
                     return (
-                        safeNumber(
-                            b.openInterest,
-                            0
-                        ) -
-                        safeNumber(
-                            a.openInterest,
-                            0
-                        )
+                        safeNumber(b.openInterest, 0) -
+                        safeNumber(a.openInterest, 0)
                     );
 
                 }
@@ -2533,19 +2400,11 @@ const buildTradeFlow =
         );
 
 
-        // =================================================
-        // ALL NSE STOCKS
-        // =================================================
-
         const allStocks =
             await fetchAllStocks(
                 marketStatus
             );
 
-
-        // =================================================
-        // MARKET ROCKERS
-        // =================================================
 
         const rockers =
             buildMarketRockers(
@@ -2553,19 +2412,11 @@ const buildTradeFlow =
             );
 
 
-        // =================================================
-        // MARKET SHOCKERS
-        // =================================================
-
         const shockers =
             buildMarketShockers(
                 allStocks
             );
 
-
-        // =================================================
-        // F&O
-        // =================================================
 
         const fnoStocks =
             await getFNOStocks(
@@ -2584,10 +2435,6 @@ const buildTradeFlow =
                 fnoStocks
             );
 
-
-        // =================================================
-        // CACHE
-        // =================================================
 
         const now =
             Date.now();
@@ -2907,6 +2754,201 @@ const clearTradeFlowCache =
         );
 
     };
+
+
+// =====================================================
+// BACKGROUND SNAPSHOTTER
+// =====================================================
+//
+// Har 15s me NSE stocks ka snapshot leta hai taaki
+// X-Factor history jaldi bane. Frontend ke request
+// aane ka wait nahi karta.
+//
+// Sirf market hours me chalta hai.
+//
+
+let backgroundTimer = null;
+
+let backgroundRunning = false;
+
+
+const runBackgroundSnapshot = async () => {
+
+    if (backgroundRunning) {
+
+        return;
+
+    }
+
+
+    const marketStatus = getMarketStatus();
+
+
+    // Market closed → skip
+
+    if (!marketStatus.isOpen) {
+
+        return;
+
+    }
+
+
+    backgroundRunning = true;
+
+
+    try {
+
+        console.log(
+            "TRADE FLOW BG: Taking X-Factor snapshot..."
+        );
+
+
+        const instruments =
+            await getActiveNSEStocks();
+
+
+        if (instruments.length === 0) {
+
+            return;
+
+        }
+
+
+        // Sirf volume snapshot lo — ranking nahi
+        // (fast hai, har 15s chal sakta hai)
+
+        for (
+            let i = 0;
+            i < instruments.length;
+            i += BATCH_SIZE
+        ) {
+
+            const batch = instruments.slice(
+                i,
+                i + BATCH_SIZE
+            );
+
+
+            try {
+
+                const quotes =
+                    await fetchQuoteBatch(
+                        batch,
+                        "NSE"
+                    );
+
+
+                quotes.forEach(quote => {
+
+                    const token = String(
+                        quote.symbolToken || ""
+                    );
+
+
+                    const volume = safeNumber(
+                        quote.tradeVolume,
+                        0
+                    );
+
+
+                    if (
+                        token &&
+                        volume > 0
+                    ) {
+
+                        // X-Factor history me snapshot daalta hai
+
+                        calculateXFactor(
+                            `NSE_${token}`,
+                            volume
+                        );
+
+                    }
+
+                });
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "TRADE FLOW BG BATCH ERROR:",
+                    error.message
+                );
+
+            }
+
+
+            await delay(BATCH_DELAY);
+
+        }
+
+
+        console.log(
+            "TRADE FLOW BG: Snapshot done"
+        );
+
+    }
+
+    catch (error) {
+
+        console.log(
+            "TRADE FLOW BG ERROR:",
+            error.message
+        );
+
+    }
+
+    finally {
+
+        backgroundRunning = false;
+
+    }
+
+};
+
+
+// =====================================================
+// START BACKGROUND SNAPSHOTTER
+// =====================================================
+
+const startBackgroundSnapshotter = () => {
+
+    if (backgroundTimer) {
+
+        return;
+
+    }
+
+
+    console.log(
+        `TRADE FLOW: Background snapshotter started (${BACKGROUND_SNAPSHOT_INTERVAL / 1000}s)`
+    );
+
+
+    // Pehla run 5s baad (server startup stabilization)
+
+    setTimeout(
+        runBackgroundSnapshot,
+        5000
+    );
+
+
+    // Fir har 15s me
+
+    backgroundTimer = setInterval(
+        runBackgroundSnapshot,
+        BACKGROUND_SNAPSHOT_INTERVAL
+    );
+
+};
+
+
+// =====================================================
+// AUTO-START on module load
+// =====================================================
+
+startBackgroundSnapshotter();
 
 
 // =====================================================

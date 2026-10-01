@@ -566,3 +566,618 @@
         align-items: stretch;
     }
 }
+
+/* =====================================================
+   LIVE TRADE FLOW PAGE
+===================================================== */
+
+.live-trade-flow-page {
+    padding: 20px;
+    background: #0b1220;
+    min-height: 100vh;
+    color: #e5edf7;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+
+/* =====================================================
+   TABS
+===================================================== */
+
+.live-flow-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 12px;
+}
+
+.live-flow-tabs button {
+    background: transparent;
+    border: 1px solid #1e293b;
+    color: #94a3b8;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
+}
+
+.live-flow-tabs button:hover {
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+.live-flow-tabs button.active {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #ffffff;
+}
+
+
+/* =====================================================
+   MARKET STATUS BAR
+===================================================== */
+
+.live-flow-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #111a2e;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-open {
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: pulse-green 1.5s infinite;
+}
+
+.status-closed {
+    background: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+}
+
+@keyframes pulse-green {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.live-flow-updated {
+    color: #64748b;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   ✅ REFRESH BUTTON
+===================================================== */
+
+.live-flow-refresh-btn {
+    margin-left: auto;
+    background: #1d4ed8;
+    color: #ffffff;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.live-flow-refresh-btn:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.live-flow-refresh-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.live-flow-refresh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =====================================================
+   FLOW CARD
+===================================================== */
+
+.live-flow-card {
+    background: #111a2e;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.live-flow-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.live-flow-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.live-flow-title h2 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #f1f5f9;
+    margin: 0;
+}
+
+.live-badge {
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.live-flow-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.live-flow-search {
+    background: #0b1220;
+    border: 1px solid #1e293b;
+    color: #e2e8f0;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.live-flow-search::placeholder {
+    color: #475569;
+}
+
+.live-flow-search:focus {
+    border-color: #3b82f6;
+}
+
+.live-flow-sort {
+    background: #0b1220;
+    border: 1px solid #1e293b;
+    color: #e2e8f0;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+}
+
+.live-flow-sort:focus {
+    border-color: #3b82f6;
+}
+
+
+/* =====================================================
+   MARKET DISTRIBUTION BAR
+===================================================== */
+
+.live-flow-progress {
+    display: flex;
+    height: 6px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #1e293b;
+    margin-bottom: 10px;
+}
+
+.progress-up {
+    background: #22c55e;
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.progress-down {
+    background: #ef4444;
+    height: 100%;
+    transition: width 0.3s;
+}
+
+
+/* =====================================================
+   MARKET COUNTS
+===================================================== */
+
+.live-flow-counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 12px;
+    margin-bottom: 14px;
+    color: #94a3b8;
+}
+
+.count-up,
+.count-down,
+.count-neutral {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.count-up b { color: #22c55e; }
+.count-down b { color: #ef4444; }
+.count-neutral b { color: #64748b; }
+
+
+/* =====================================================
+   TABLE HEADER + ROW GRID
+===================================================== */
+
+.live-flow-table-header,
+.live-flow-row {
+    display: grid;
+    grid-template-columns:
+        minmax(180px, 2fr)
+        minmax(120px, 1.2fr)
+        minmax(90px, 0.9fr)
+        minmax(90px, 0.9fr)
+        minmax(80px, 0.7fr)
+        minmax(130px, 1fr)
+        minmax(80px, 0.7fr);
+    gap: 12px;
+    align-items: center;
+    padding: 10px 8px;
+}
+
+.live-flow-table-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.7px;
+    border-bottom: 1px solid #1e293b;
+    padding-top: 4px;
+    padding-bottom: 12px;
+}
+
+.live-flow-list {
+    max-height: 620px;
+    overflow-y: auto;
+}
+
+.live-flow-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.live-flow-list::-webkit-scrollbar-track {
+    background: #0b1220;
+}
+
+.live-flow-list::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+}
+
+.live-flow-row {
+    border-bottom: 1px solid #131d33;
+    font-size: 13px;
+    transition: background 0.1s;
+}
+
+.live-flow-row:hover {
+    background: #16223a;
+}
+
+
+/* =====================================================
+   SYMBOL CELL
+===================================================== */
+
+.live-flow-symbol {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.stock-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.stock-avatar-green {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+}
+
+.stock-avatar-red {
+    background: linear-gradient(135deg, #b91c1c, #ef4444);
+}
+
+.stock-name-box {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.stock-name-box strong {
+    color: #f1f5f9;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stock-name-box span {
+    color: #64748b;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   BUY / SELL PRESSURE
+===================================================== */
+
+.live-flow-pressure {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.pressure-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.pressure-bar {
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: #1e293b;
+}
+
+.pressure-buy {
+    background: #22c55e;
+    height: 100%;
+}
+
+.pressure-sell {
+    background: #ef4444;
+    height: 100%;
+}
+
+
+/* =====================================================
+   PRICE + CHANGE
+===================================================== */
+
+.live-flow-price {
+    color: #e2e8f0;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.live-flow-change {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.live-flow-change-up {
+    color: #22c55e;
+}
+
+.live-flow-change-down {
+    color: #ef4444;
+}
+
+
+/* =====================================================
+   X FACTOR
+===================================================== */
+
+.live-flow-xfactor {
+    color: #facc15;
+    font-weight: 700;
+    font-size: 13px;
+    text-align: center;
+}
+
+
+/* =====================================================
+   SIGNAL BOX
+===================================================== */
+
+.signal-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.live-flow-signal-icon {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.signal-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.live-flow-signal-up {
+    color: #22c55e;
+}
+
+.live-flow-signal-down {
+    color: #ef4444;
+}
+
+.live-flow-signal-neutral {
+    color: #94a3b8;
+}
+
+
+/* =====================================================
+   TIME
+===================================================== */
+
+.live-flow-time {
+    color: #64748b;
+    font-size: 11px;
+    text-align: right;
+}
+
+
+/* =====================================================
+   EMPTY / LOADING / ERROR
+===================================================== */
+
+.live-flow-empty {
+    text-align: center;
+    padding: 40px 0;
+    color: #475569;
+    font-size: 13px;
+}
+
+.live-flow-loading,
+.live-flow-error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+    font-size: 15px;
+}
+
+.live-flow-error {
+    color: #ef4444;
+}
+
+.live-flow-refresh-error {
+    background: #7f1d1d;
+    color: #fecaca;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+    .live-flow-table-header,
+    .live-flow-row {
+        grid-template-columns:
+            minmax(160px, 2fr)
+            minmax(100px, 1fr)
+            minmax(80px, 0.8fr)
+            minmax(80px, 0.8fr)
+            minmax(70px, 0.6fr)
+            minmax(110px, 1fr)
+            minmax(70px, 0.7fr);
+        gap: 8px;
+        font-size: 12px;
+    }
+
+    .live-flow-search {
+        width: 160px;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    .live-trade-flow-page {
+        padding: 12px;
+    }
+
+    .live-flow-table-header {
+        display: none;
+    }
+
+    .live-flow-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 14px 8px;
+        border-radius: 10px;
+        background: #0e1729;
+        margin-bottom: 8px;
+    }
+
+    .live-flow-symbol {
+        grid-column: span 2;
+    }
+
+    .live-flow-time {
+        text-align: left;
+    }
+
+    .live-flow-search {
+        width: 100%;
+    }
+
+    .live-flow-card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .live-flow-refresh-btn {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+}
